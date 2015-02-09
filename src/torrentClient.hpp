@@ -7,10 +7,13 @@
 namespace torrent {
 
 // Class that represents a request to upload/download the data associated
-// with a torrent file.  Handles file IO, choosing which chunks to upload/
-// download, etc.
+// with specific torrent file.  Handles file IO, choosing which chunks to 
+// upload/download, etc.
 class TorrentClient : public TorrentClientProtocol {
   public:
+    //CREATORS
+    explicit TorrentClient(std::string torrentFile, std::string downloadLocation);
+  
     // Override TorrentClientProtocol method
     void chunkDownloadSuccess(const Chunk& chunk);
     // Override TorrentClientProtocol method
@@ -18,9 +21,13 @@ class TorrentClient : public TorrentClientProtocol {
     
     // Given a path to a torrent file and a download location, download any
     // missing chunks, and upload all chunks we have.
-    void add(std::string torrentFile, std::string downloadLocation);
+    int start();
     // Stop downloads/uploads of a given torrent file.
-    void stop(std::string torrentFile);
+    int stop();
+  private:
+    //DATA
+    std::string torrentFile;
+    std::string downloadLocation;
 };
 
 }
