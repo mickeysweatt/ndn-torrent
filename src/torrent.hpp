@@ -8,7 +8,7 @@
 namespace torrent {
 
 class Torrent {
-    // A value-semantic attribute class for torrents the
+    // A value-semantic attribute class for torrents. 
   public:
     // CREATORS
     Torrent();
@@ -17,7 +17,6 @@ class Torrent {
   private:
     std::string            m_announceURL;
     std::list<std::string> m_announceList;
-    // A value-semantic attribute class for torrents the
 };
 
 }
