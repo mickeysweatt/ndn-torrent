@@ -107,7 +107,7 @@ namespace torrent {
     Torrent&& TorrentParserUtil::parseFile(const std::string& filename)
     {
          std::unordered_map<string, string> torrentDict;
-         Torrent t;
+         //Torrent t;
          std::ifstream ifs;
          std::string key;
          std::string value;
@@ -131,12 +131,8 @@ namespace torrent {
             //torrentDict[key] = value;
          }
          ifs.close();
-        return std::move(t);
+        //return std::move(t);
     }
 
-}
-
-int main() {
-    torrent::TorrentParserUtil::parseFile("/Users/admin/Desktop/ubuntu-14.10-desktop-amd64.iso.torrent");
 }
 

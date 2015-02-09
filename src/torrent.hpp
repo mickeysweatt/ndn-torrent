@@ -3,20 +3,46 @@
 
 #include <list>
 #include <string>
-#include <map>
 
 namespace torrent {
+
+class Chunk;
 
 class Torrent {
     // A value-semantic attribute class for torrents. 
   public:
     // CREATORS
     Torrent();
-    // Create an empty 'torrent' with all attributes set to 'nullptr'.
+    // Create an empty 'torrent'.
 
+    ~Torrent();
+    // Destroy this object.
+
+    Torrent(std::list<std::string>& announceList, 
+            std::string&            name,
+            size_t                  pieceLength,
+            std::list<Chunk>&       chunkList);
+    
+    // ACCESSORS
+    const std::list<std::string>& getAnnounceURLList() const;
+    // Return the list with all the the domains for all trackers for this
+    // torrent
+
+    const std::string& getName() const;
+    // Return the name of this torrent file.
+
+    size_t getPieceLength() const;
+    // Return the length of each piece in this torrent.
+
+    const std::list<Chunk>& getChunks() const;
+    // Return a list of all the chunks in this torrent.
+  
   private:
-    std::string            m_announceURL;
+    // DATA
     std::list<std::string> m_announceList;
+    std::string            m_name;
+    size_t                 m_pieceLength;
+    std::list<Chunk>       m_chunks;
 };
 
 }

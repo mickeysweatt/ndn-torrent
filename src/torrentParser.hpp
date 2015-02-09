@@ -15,28 +15,34 @@ class TorrentParserUtil {
   
   // TYPES
   public:
-     class ParseError : public std::exception {
-        // An exception thrown if there if a malformed torrent file is detected
+     TorrentParserUtil() = delete;
+      // Create an instance of a parser util. Note that this is declared deleted
+      // because an instance of a 'TorrentParserUtil' 
+
+     class ParseError : public std::logic_error {
+       // An exception thrown if there if a malformed torrent file is detected
        public:
-        explicit ParseError(const std::string&  what);
+         explicit ParseError(const std::string& what);
+          // Create a 'ParseError' with the specified 'what' string
+
      };
 
     // CLASS METHODS
     static Torrent&& parseFile(const std::string& filename);
-        // Parse the file referenceed by the specified 'filename' into a
-        // 'Torrent'. Behavior undefined unless 'filename' references a valid
-        // bencoded torrent file.
-    
+      // Parse the file referenceed by the specified 'filename' into a
+      // 'Torrent'. Behavior undefined unless 'filename' references a valid
+      // bencoded torrent file.
 };
 
 //==============================================================================
 //                          INLINE METHODS
 //==============================================================================
 
- inline 
- TorrentParserUtil::ParseError::ParseError(const std::string &what) : exception()
- {
- }
+inline 
+TorrentParserUtil::ParseError::ParseError(const std::string &what) 
+: logic_error(what)
+{
+}
 
 } // end of torrent namespace
 
