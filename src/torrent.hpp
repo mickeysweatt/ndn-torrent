@@ -8,15 +8,15 @@
 namespace torrent {
 
 class Torrent {
-	// A value-semantic attribute class for torrents the
+    // A value-semantic attribute class for torrents the
   public:
-	// CREATORS
+    // CREATORS
     Torrent();
-	// Create an empty 'torrent' with all attributes set to 'nullptr'.
+    // Create an empty 'torrent' with all attributes set to 'nullptr'.
 
   private:
-  	std::string 		   m_announceURL;
-  	std::list<std::string> m_announceList;
+    std::string            m_announceURL;
+    std::list<std::string> m_announceList;
 };
 
 }
