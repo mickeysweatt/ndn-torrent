@@ -38,7 +38,6 @@ class TorrentParserUtil {
  {
  }
 
-
 } // end of torrent namespace
 
 #endif

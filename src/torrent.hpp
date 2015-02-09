@@ -17,6 +17,7 @@ class Torrent {
   private:
     std::string            m_announceURL;
     std::list<std::string> m_announceList;
+    // A value-semantic attribute class for torrents the
 };
 
 }

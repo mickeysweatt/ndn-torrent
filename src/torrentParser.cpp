@@ -1,5 +1,5 @@
-#include "torrentParser.hpp"
-#include "torrent.hpp"
+#include <torrentParser.hpp>
+#include <torrent.hpp>
 #include <fstream>
 #include <string>
 #include <sstream>
@@ -70,21 +70,21 @@ namespace torrent {
     
     static string getNextToken(std::ifstream& ifs) {
         string buff;
-	 	char   type;
-	 	size_t length;
-	 	char   c;
-	 	type = ifs.get();
+        char   type;
+        size_t length;
+        char   c;
+        type = ifs.get();
 
-	 	switch(type) {
-	 		case 'i': {
-	 			buff = "";
-	 			while(c != 'e' && ifs.good()) {
-	 				c = ifs.get();
-	 				buff += c;		
-	 			}
+        switch(type) {
+            case 'i': {
+                buff = "";
+                while(c != 'e' && ifs.good()) {
+                    c = ifs.get();
+                    buff += c;      
+                }
                 //return std::move(buff);
-	 		} break;
-	 		default: {
+            } break;
+            default: {
                 // byte string
                 if (isdigit(type)) {
                     buff = type;
@@ -99,40 +99,40 @@ namespace torrent {
                 else {
                     std::cerr << "IMPLEMENT ME: " << type << std::endl;
                 }
-	 		}
-	 	}
+            }
+        }
         return buff;
-	 }
+     }
 
-	Torrent&& TorrentParserUtil::parseFile(const std::string& filename)
-	{
+    Torrent&& TorrentParserUtil::parseFile(const std::string& filename)
+    {
          std::unordered_map<string, string> torrentDict;
          Torrent t;
          std::ifstream ifs;
-		 std::string key;
-		 std::string value;
+         std::string key;
+         std::string value;
          std::list<string> value_list;
          ifs.open(filename, std::ios::binary);
-		 if (ifs.bad()) {
-		 	throw new ParseError("unable to open: " + filename);
-		 }
+         if (ifs.bad()) {
+            throw new ParseError("unable to open: " + filename);
+         }
 
-		 // A torrent file is a dict, so lets read the 'd' off the front
+         // A torrent file is a dict, so lets read the 'd' off the front
         
-		 if ('d' != ifs.get()) {
-		 	throw new ParseError("Malformed torrent file");
-		 }
-		 while(ifs.good()) {
-		 	key   = getNextToken(ifs);
+         if ('d' != ifs.get()) {
+            throw new ParseError("Malformed torrent file");
+         }
+         while(ifs.good()) {
+            key   = getNextToken(ifs);
             if (key == "announce-list") {
                 value_list = getNextTokenList(ifs);
             }
-		 	value = getNextToken(ifs);
+            value = getNextToken(ifs);
             //torrentDict[key] = value;
-		 }
-		 ifs.close();
+         }
+         ifs.close();
         return std::move(t);
-	}
+    }
 
 }
 
