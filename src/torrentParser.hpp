@@ -2,6 +2,7 @@
 #define INCLUDED_TORRENT_PARSER_HPP
 
 #include <string>
+#include <stdexcept>
 #include <exception>
 
 namespace torrent {
