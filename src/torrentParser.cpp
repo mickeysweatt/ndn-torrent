@@ -167,7 +167,7 @@ namespace {
         }
         length = atoi(length_str.c_str());
         buffer = new char[length + 1];
-        in.get(buffer, length + 1);
+        in.read(buffer, length);
         setValue(string(buffer));
     }
     
@@ -239,9 +239,6 @@ namespace {
             key = dynamic_cast<ByteStringToken *>(&torrent::getNextToken(in));
             if (nullptr == key) {
                 throw new torrent::TorrentParserUtil::ParseError("Bad key");
-            }
-            else {
-                std::cout << key->getValue() << std::endl;
             }
             value = &torrent::getNextToken(in);
             m_dict[*key] = value;
