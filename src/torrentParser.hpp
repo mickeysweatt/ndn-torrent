@@ -29,10 +29,10 @@ class TorrentParserUtil {
      };
 
     // CLASS METHODS
-    static Torrent&& parseFile(const std::string& filename);
-      // Parse the file referenceed by the specified 'filename' into a
-      // 'Torrent'. Behavior undefined unless 'filename' references a valid
-      // bencoded torrent file.
+    static Torrent&& parseFile(std::istream& in);
+        // Parse the specified 'in' stream as a torrent file. Behavior is undefined unless
+        // contents refers to a valid torrent file.
+    
 };
 
 //==============================================================================
@@ -40,7 +40,7 @@ class TorrentParserUtil {
 //==============================================================================
 
 inline 
-TorrentParserUtil::ParseError::ParseError(const std::string &what) 
+TorrentParserUtil::ParseError::ParseError(const std::string &what)
 : logic_error(what)
 {
 }
