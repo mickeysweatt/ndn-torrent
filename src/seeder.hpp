@@ -1,7 +1,7 @@
 #ifndef INCLUDED_SEEDER_HPP
 #define INCLUDED_SEEDER_HPP
 
-#include "torrentClientProto.hpp"
+#include <torrentClientProto.hpp>
 #include <list>
 
 namespace torrent {

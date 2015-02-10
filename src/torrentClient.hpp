@@ -1,7 +1,7 @@
 #ifndef INCLUDED_TORRENT_CLIENT_HPP
 #define INCLUDED_TORRENT_CLIENT_HPP
 
-#include "torrentClientProto.hpp"
+#include <torrentClientProto.hpp>
 #include <string>
 
 namespace torrent {

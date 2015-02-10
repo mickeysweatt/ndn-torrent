@@ -1,7 +1,7 @@
 #ifndef INCLUDED_LEECHER_HPP
 #define INCLUDED_LEECHER_HPP
 
-#include "torrentClientProto.hpp"
+#include <torrentClientProto.hpp>
 #include <list>
 
 namespace torrent {

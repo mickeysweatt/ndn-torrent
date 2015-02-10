@@ -37,7 +37,7 @@ public:
 private:
   // DATA
   ChunkInfo& m_metadata;
-  std::vector<char>& m_buffer;
+  std::vector<char> m_buffer;
 };
 
 } // namespace torrent
