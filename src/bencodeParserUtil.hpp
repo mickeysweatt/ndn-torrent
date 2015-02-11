@@ -25,6 +25,7 @@
 #include <map>
 #include <iosfwd>
 #include <exception>
+#include <functional>
 
 namespace torrent {
 
@@ -141,7 +142,6 @@ class BencodeDict : public BencodeToken {
 //==============================================================================
 //                       INLINE FUNCTION DEFINTIONS
 //==============================================================================
-
 inline BencodeToken::BencodeToken()
 {
 }
