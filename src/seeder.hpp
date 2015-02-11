@@ -1,8 +1,18 @@
 #ifndef INCLUDED_SEEDER_HPP
 #define INCLUDED_SEEDER_HPP
 
+// #include <ndn/producer-context.hpp>
+
 #include <torrentClientProto.hpp>
+
 #include <list>
+#include <string>
+
+static const std::string TORRENT_NAMESPACE = "/torrent/";
+
+namespace ndn {
+	 class Producer;
+}
 
 namespace torrent {
 
@@ -31,7 +41,21 @@ public:
 private:
    // DATA
    TorrentClientProtocol& m_clientProtocol;
+	 // std::vector<ndn::Producer> m_producer;
 };
+
+//==============================================================================
+//                       INLINE FUNCTION DEFINTIONS
+//==============================================================================
+
+inline Seeder::Seeder(TorrentClientProtocol& clientProtocol)
+	 : m_clientProtocol(clientProtocol)
+{
+}
+
+inline Seeder::~Seeder()
+{
+}
 
 } // namespace torrent
 
