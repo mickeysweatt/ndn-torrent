@@ -12,12 +12,14 @@ namespace torrent {
 class TorrentClient : public TorrentClientProtocol {
   public:
     //CREATORS
-    explicit TorrentClient(std::string torrentFile, std::string downloadLocation);
+    explicit TorrentClient(const std::string& torrentFile,
+            const std::string& downloadLocation);
   
     // Override TorrentClientProtocol method
     void chunkDownloadSuccess(const Chunk& chunk);
     // Override TorrentClientProtocol method
-    void chunkDownloadFail(error_t error, const ChunkInfo& chunkMetadata);
+    void chunkDownloadFail(TorrentClientProtocol::Error error,
+            const ChunkInfo& chunkMetadata);
     
     // Given a path to a torrent file and a download location, download any
     // missing chunks, and upload all chunks we have.
