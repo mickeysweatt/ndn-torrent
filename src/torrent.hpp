@@ -3,6 +3,7 @@
 
 #include <list>
 #include <string>
+#include <chunkInfo.hpp>
 
 namespace torrent {
 
@@ -20,8 +21,8 @@ class Torrent {
 
     Torrent(std::list<std::string>& announceList, 
             std::string&            name,
-            size_t                  pieceLength/*,
-          std::list<Chunk>&       chunkList */);
+            size_t                  pieceLength,
+            std::list<ChunkInfo>&   chunkList );
     
     // ACCESSORS
     const std::list<std::string>& getAnnounceURLList() const;
