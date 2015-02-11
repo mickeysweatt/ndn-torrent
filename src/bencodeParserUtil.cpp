@@ -21,7 +21,7 @@ namespace torrent {
         
         switch(type) {
             case 'i': {
-                curr_tok_p = new IntegearToken(ifs);
+                curr_tok_p = new IntegerToken(ifs);
             } break;
             case 'l' : {
                 curr_tok_p = new BencodeList(ifs);
@@ -42,7 +42,7 @@ namespace torrent {
         return *curr_tok_p;
     }
     
-    IntegearToken::IntegearToken(std::istream& in)
+    IntegerToken::IntegerToken(std::istream& in)
     {
         string int_buff;
         char c;

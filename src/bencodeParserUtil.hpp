@@ -70,11 +70,11 @@ class BencodeToken {
     // Delete this object
 };
 
-class IntegearToken : public BencodeToken {
+class IntegerToken : public BencodeToken {
   public:
-    IntegearToken();
+    IntegerToken();
 
-    explicit IntegearToken(std::istream& in);
+    explicit IntegerToken(std::istream& in);
 
     int getValue() const;
 
@@ -155,16 +155,16 @@ inline BencodeParserUtil::ParseError::ParseError(const std::string& what)
 {
 }
 
-inline IntegearToken::IntegearToken()
+inline IntegerToken::IntegerToken()
 {
 }
 
-inline void IntegearToken::setValue(int value)
+inline void IntegerToken::setValue(int value)
 {
     m_value = value;
 }
 
-inline int IntegearToken::getValue() const
+inline int IntegerToken::getValue() const
 {
     return m_value;
 }
