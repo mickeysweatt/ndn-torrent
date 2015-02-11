@@ -12,9 +12,13 @@ def configure(conf):
                lib='ndn-cxx',
                mandatory=True, 
                 uselib_store='NDN-CXX')
+    conf.check(compiler='cxx',
+               lib='ssl',
+               mandatory=True, 
+               uselib_store='OPENSSL')
 
 def build(bld):
-    libs = ['crypto', 'ndn-cxx']
+    libs = ['crypto', 'ndn-cxx', 'ssl']
     bld.program(source=bld.path.ant_glob('src/*.cpp'),
                 includes=". src",
                 target='torrentParser',

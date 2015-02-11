@@ -12,7 +12,7 @@ class SHA1Hash
   	// CREATORS
   	SHA1Hash();
 
-  	explicit SHA1Hash(unsigned char *hash);
+  	explicit SHA1Hash(const unsigned char *hash);
   	// Create a 'SHA1Hash' with the value of the specified
   	// 'hash' buffer.
 
@@ -26,11 +26,13 @@ class SHA1Hash
 	unsigned char m_hash[20];
 };
 
+inline bool operator==(const torrent::SHA1Hash& lhs, const torrent::SHA1Hash& rhs)
+{
+ return 0 == memcmp(lhs.m_hash, rhs.m_hash, 20);
 }
 
-// bool operator==(const torrent::SHA1Hash& lhs, const torrent::SHA1Hash& rhs)
-// {
-// 	return 0 == memcmp(lhs.m_hash, rhs.m_hash, 20);
-// }
+}
+
+
 
 #endif // INCLUDED_SHA_HPP
