@@ -4,6 +4,14 @@ def options(opt):
 def configure(conf):
     conf.check_tool("compiler_cxx")
     conf.env.append_value('CXXFLAGS', ['-O2', '-g', '-std=c++0x', '-Wc++11-extensions'])
+    conf.check(compiler='cxx',
+               lib='crypto',
+               mandatory=True, 
+                uselib_store='CRYPTO')
+    conf.check(compiler='cxx',
+               lib='ndn-cxx',
+               mandatory=True, 
+                uselib_store='CRYPTO')
 
 def build(bld):
     bld.program(source=bld.path.ant_glob('src/*.cpp'),
