@@ -84,14 +84,31 @@ class IntegerToken : public BencodeToken {
 };
     
 class ByteStringToken : public BencodeToken {
+  
+  // FRIENDS
+  friend bool operator==(const ByteStringToken& lhs, const ByteStringToken& rhs);
+    
   public:
     ByteStringToken();
+    
+    explicit ByteStringToken(const char *buffer, size_t length);
+    
+    template<size_t Size>
+    ByteStringToken(const char(& array)[Size]);
+    // Create a new object with the value of the specified 'array'. Note that this
+    // method is defined implicit for the sake of syntax sugar and does not copy
+    // the null-byte.
+    
+    explicit ByteStringToken(std::string& str);
         
     explicit ByteStringToken(std::istream& in);
     
     const std::vector<char>& getValue() const;
     
+    std::string getString() const;
+    
     void setValue(const std::vector<char>& value);
+    
   private:
     std::vector<char> m_value;
 };
@@ -115,12 +132,12 @@ class BencodeList : public BencodeToken {
 };
     
 class BencodeDict : public BencodeToken {
-  private:
-    typedef std::function<bool(const ByteStringToken&, 
-                               const ByteStringToken&)> BencodeDictComparator;
-    static BencodeDictComparator keyComparator;
- 
   public:
+    typedef std::function<bool(const ByteStringToken&,
+                               const ByteStringToken&)> BencodeDictComparator;
+  
+    static BencodeDictComparator keyComparator;
+    
     BencodeDict();
         
     ~BencodeDict();
@@ -132,7 +149,11 @@ class BencodeDict : public BencodeToken {
                                         BencodeDictComparator>& dict);
     
     BencodeToken& operator[](const ByteStringToken key);
-        
+    
+    const std::map<ByteStringToken,
+                   BencodeToken*,
+                   BencodeDictComparator>& getValues() const;
+    
   private:
     std::map<ByteStringToken,
              BencodeToken*,
@@ -183,6 +204,12 @@ inline void ByteStringToken::setValue(const std::vector<char> &value)
     m_value = value;
 }
 
+template<size_t Size>
+ByteStringToken::ByteStringToken(const char(& array)[Size])
+: m_value(array, array + Size - 1)
+{
+}
+
 inline BencodeList::BencodeList()
 {
 }
@@ -226,6 +253,11 @@ inline BencodeToken& BencodeDict::operator[](const ByteStringToken key)
     return *m_dict[key];
 }
 
+inline
+bool operator==(const ByteStringToken& lhs, const ByteStringToken& rhs)
+{
+    return lhs.m_value == rhs.m_value;
 }
 
+} // end of torrent namespace
 #endif 

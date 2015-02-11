@@ -47,36 +47,63 @@ namespace torrent {
         string int_buff;
         char c;
         if ('i' != in.peek()) {
-            throw new BencodeParserUtil::ParseError("Attempting to construct integear token from non-integear");
+            throw new BencodeParserUtil::ParseError("Attempting to construct "
+                                                    "integer token from "
+                                                    "non-integer ");
         }
         // consume the i
         in.get();
         while('e' != (c = in.get())) {
             if (!isdigit(c)) {
-                throw new BencodeParserUtil::ParseError("Attempting to construct integear token from non-integear");
+                throw new BencodeParserUtil::ParseError("Attempting to "
+                                                        "construct integer "
+                                                        "token from "
+                                                        "non-integer");
             }
             int_buff += c;
         }
         setValue(atoi(int_buff.c_str()));
     }
     
+    ByteStringToken::ByteStringToken(const char *buffer, size_t length)
+    : m_value(buffer, buffer + length)
+    {
+    }
+    
+    ByteStringToken::ByteStringToken(std::string& str)
+    : m_value(str.begin(), str.end())
+    {
+    }
+    
     ByteStringToken::ByteStringToken(std::istream& in){
         string length_str;
         int length;
         char c;
+        char *buffer;
         
         if (!isdigit(in.peek())) {
-            throw BencodeParserUtil::ParseError("Attemptying to construct a byte string from an illformed string");
+            throw BencodeParserUtil::ParseError("Attemptying to construct a "
+                                                "byte string from an illformed "
+                                                "string");
         }
         while(':' != (c = in.get())) {
             if (!isdigit(c)) {
-                throw new BencodeParserUtil::ParseError("Attempting to construct integear token from illformed string");
+                throw new BencodeParserUtil::ParseError("Attempting to construct integer "
+                                                        "token from illformed string");
             }
             length_str += c;
         }
         length = atoi(length_str.c_str());
         m_value.reserve(length);
-        in.read(&m_value[0], length);
+        buffer = new char[length];
+        in.read(buffer, length);
+        std::copy(buffer, buffer + length, std::back_inserter(m_value));
+        m_value.size();
+        delete [] buffer;
+    }
+    
+    string ByteStringToken::getString() const {
+        return std::move(string(m_value.begin(), m_value.end()));
     }
     
     BencodeList::BencodeList(std::istream& in)
@@ -120,5 +147,10 @@ namespace torrent {
         in.get();
     }
     
-
+    const std::map<ByteStringToken,
+                   BencodeToken*,
+                   BencodeDict::BencodeDictComparator>& BencodeDict::getValues() const
+    {
+        return m_dict;
+    }
 }
