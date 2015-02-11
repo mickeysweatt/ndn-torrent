@@ -19,10 +19,11 @@ class TorrentClient : public TorrentClientProtocol {
     void chunkDownloadSuccess(const Chunk& chunk);
     // Override TorrentClientProtocol method
     void chunkDownloadFail(TorrentClientProtocol::Error error,
-            const ChunkInfo& chunkMetadata);
+                           const ChunkInfo& chunkMetadata);
     
     // Given a path to a torrent file and a download location, download any
     // missing chunks, and upload all chunks we have.
+    
     int start();
     // Stop downloads/uploads of a given torrent file.
     int stop();
