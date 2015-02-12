@@ -1,12 +1,13 @@
 #include <sha1hash.hpp>
-#include <openssl/sha.h>
+#include <openssl/evp.h>
 #include <cstring>
+#include <cryptopp/sha.h>
 
 namespace torrent {
 	
 	SHA1Hash::SHA1Hash(const unsigned char *data, unsigned long length)
 	{
-// 		SHA1(data, length, m_hash);
+        CryptoPP::SHA1().CalculateDigest(m_hash, data, length);
 	}
 
 	SHA1Hash::SHA1Hash(const unsigned char *data) 

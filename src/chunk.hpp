@@ -74,11 +74,13 @@ inline const std::vector<char>& Chunk::getBuffer() const
 inline int Chunk::setMetadata(const ChunkInfo& metadata)
 {
 	 m_metadata = metadata;
+     return -1;
 }
 
 inline int Chunk::setBuffer(const std::vector<char>& buffer)
 {
 	 m_buffer = buffer;
+     return -1;
 }
 
 } // namespace torrent

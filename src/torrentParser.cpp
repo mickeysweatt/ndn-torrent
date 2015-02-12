@@ -10,7 +10,11 @@ using std::list;
 
 
 namespace torrent {
-
+    static std::list<string> getAnnounceList(const BencodeList* announceListToken)
+    {
+        std::list<string> t;
+        return std::move(t);
+    }
     Torrent&& TorrentParserUtil::parseFile(std::istream& in)
     {
         Torrent t;
@@ -26,10 +30,8 @@ namespace torrent {
             throw new ParseError("Illformed torrent file");
         }
         torrentDict = ast->getValues();
-        BencodeToken *currTok = torrentDict["announce"];
-        if (nullptr == currTok) {
-            throw new ParseError("Illformed torrent file");
-        }
+        getAnnounceList(dynamic_cast<BencodeList *>(torrentDict["announce-list"]));
+        
         return std::move(t);
      }
 }
