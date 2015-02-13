@@ -10,11 +10,34 @@ using std::list;
 
 
 namespace torrent {
+    
     static std::list<string> getAnnounceList(const BencodeList* announceListToken)
     {
-        std::list<string> t;
-        return std::move(t);
+        list<string> announcelist;
+        list<BencodeToken *> tempList1, tempList2;
+        BencodeList *curr_list;
+        
+        if (nullptr == announceListToken) {
+            throw TorrentParserUtil::ParseError("announce-list illformatted");
+        }
+        tempList1 = announceListToken->getTokens();
+        //unpack announce-list
+        for (auto it : tempList1) {
+            curr_list = dynamic_cast<BencodeList *>(it);
+            if (nullptr == curr_list) {
+                throw TorrentParserUtil::ParseError("announce-list illformatted");
+            }
+            for (auto it2 : curr_list->getTokens()) {
+                tempList2.push_back((it2));
+            }
+        }
+        // grab strings from unpacked list
+        for (auto it : tempList2) {
+            announcelist.push_back(dynamic_cast<ByteStringToken *>(it)->getString());
+        }
+        return std::move(announcelist);
     }
+
     Torrent&& TorrentParserUtil::parseFile(std::istream& in)
     {
         Torrent t;
@@ -30,7 +53,7 @@ namespace torrent {
             throw new ParseError("Illformed torrent file");
         }
         torrentDict = ast->getValues();
-        getAnnounceList(dynamic_cast<BencodeList *>(torrentDict["announce-list"]));
+        announceList = getAnnounceList(dynamic_cast<BencodeList *>(torrentDict["announce-list"]));
         
         return std::move(t);
      }
