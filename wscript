@@ -1,16 +1,14 @@
+## -*- Mode: python; py-indent-offset: 4; indent-tabs-mode: nil; coding: utf-8; -*-
+
+import os
+
 def options(opt):
     opt.tool_options("compiler_cxx")
 
 def configure(conf):
     conf.check_tool("compiler_cxx")
     conf.env.append_value('CXXFLAGS', ['-O2', '-g', '-std=c++0x'])
-    conf.check(compiler='cxx',
-               cxxflags=['-Wc++11-extensions'],
-	       define_name='HAVE_C11_EXTENSIONS',
-               mandatory=False)
-    if conf.env['HAVE_C11_EXTENSIONS']:
-        conf.env.append_value('CXXFLAGS', ['-Wc++11-extensions'])
-
+    conf.env.LIBPATH_MYLIB = ['/usr/local/lib']
     conf.check(compiler='cxx',
                lib='cryptopp',
                mandatory=True, 
@@ -19,11 +17,16 @@ def configure(conf):
                lib='ndn-cxx',
                mandatory=True,
                uselib_store='NDN-CXX')
-    
-    conf.check_cfg(package='libndn-cxx',
+    if not os.environ.has_key('PKG_CONFIG_PATH'):
+           os.environ['PKG_CONFIG_PATH'] = ':'.join([
+               '/usr/local/lib/pkgconfig',
+               '/opt/local/lib/pkgconfig'])
+
+    conf.check_cfg(compiler='cxx',
+                   package='libndn-cxx',
                    uselib_store = 'NDN-CXX',
                    args=['--cflags', '--libs'],
-                   mandatory=False)
+                   mandatory=True)
 
 def build(bld):
     libs = ['cryptopp', 'ndn-cxx', 'ssl']
@@ -31,4 +34,4 @@ def build(bld):
                 includes=". src",
                 target='torrentParser',
                 stlib=libs,
-		use=['CRYPTOPP', 'NDN-CXX'])
+                use=['CRYPTOPP', 'NDN-CXX'])
