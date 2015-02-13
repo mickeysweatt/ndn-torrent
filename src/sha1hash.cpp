@@ -5,6 +5,10 @@
 #include <cryptopp/sha.h>
 
 namespace torrent {
+
+	SHA1Hash::SHA1Hash()
+	{
+	}
 	
 	SHA1Hash::SHA1Hash(const unsigned char *data, unsigned long length)
 	{

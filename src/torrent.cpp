@@ -12,11 +12,11 @@ namespace torrent {
 
 	// TODO: Hannah
      Torrent::Torrent(std::list<std::string>& announceList, 
-            std::string&            name,
-            size_t                  pieceLength,
-            std::list<ChunkInfo>&   chunkList )
+		            std::string&            name,
+		            size_t                  pieceLength)
+     : m_name(name), m_pieceLength(pieceLength)
      {
-
+		memcpy(&m_announceList, &announceList, sizeof(announceList));
      }
 
 

@@ -21,8 +21,10 @@ class Torrent {
 
     Torrent(std::list<std::string>& announceList, 
             std::string&            name,
-            size_t                  pieceLength,
-            std::list<ChunkInfo>&   chunkList );
+            size_t                  pieceLength/*,
+            std::vector<char>       pieces,
+            std::list<...>          fileList */
+           );
     
     // ACCESSORS
     const std::list<std::string>& getAnnounceURLList() const;
@@ -40,10 +42,10 @@ class Torrent {
   
   private:
     // DATA
-    std::list<std::string> m_announceList;
-    std::string            m_name;
-    size_t                 m_pieceLength;
-//    std::list<Chunk>       m_chunks;
+    std::list<std::string>  m_announceList;
+    std::string             m_name;
+    size_t                  m_pieceLength;
+    std::list<ChunkInfo>    m_chunks;
 };
 
 }
