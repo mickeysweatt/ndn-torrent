@@ -1,3 +1,4 @@
+#include <cstring>
 #include <sha1hash.hpp>
 #include <openssl/evp.h>
 #include <cstring>
@@ -10,8 +11,8 @@ namespace torrent {
         CryptoPP::SHA1().CalculateDigest(m_hash, data, length);
 	}
 
-	SHA1Hash::SHA1Hash(const unsigned char *data) 
+	SHA1Hash::SHA1Hash(const unsigned char *hash)
 	{
-		memcpy(m_hash, data, 20);
+		memcpy(m_hash, hash, 20);
 	}
 }
