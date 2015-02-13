@@ -1,20 +1,21 @@
 #ifndef INCLUDED_SEEDER_HPP
 #define INCLUDED_SEEDER_HPP
 
-// #include <ndn/producer-context.hpp>
+#include <ndn-cxx/contexts/producer-context.hpp>
 
 #include <torrentClientProto.hpp>
 
 #include <list>
+#include <memory>
 #include <string>
+#include <unordered_map>
 
-static const std::string TORRENT_NAMESPACE = "/torrent/";
-
-namespace ndn {
-	 class Producer;
-}
+/// TODO: Probably move this to a global header.
+const char TORRENT_NAMESPACE[] = "/torrent";
 
 namespace torrent {
+
+typedef int chunkId;
 
 class Chunk;
 class ChunkInfo;
@@ -41,7 +42,8 @@ public:
 private:
    // DATA
    TorrentClientProtocol& m_clientProtocol;
-	 // std::vector<ndn::Producer> m_producer;
+	 std::unordered_map<chunkId, std::unique_ptr<ndn::Producer>> m_producers;
+	 void onInterest(ndn::Interest& interest);
 };
 
 //==============================================================================
