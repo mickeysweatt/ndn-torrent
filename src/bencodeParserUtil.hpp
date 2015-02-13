@@ -148,7 +148,9 @@ class BencodeDict : public BencodeToken {
                                         BencodeToken *, 
                                         BencodeDictComparator>& dict);
     
-    BencodeToken& operator[](const ByteStringToken key);
+    BencodeToken& operator[](const ByteStringToken& key);
+    
+    const BencodeToken& operator[](const ByteStringToken& key) const;
     
     const std::map<ByteStringToken,
                    BencodeToken*,
@@ -248,9 +250,14 @@ inline void BencodeList::setTokens(const std::list<BencodeToken *> &toks)
     m_tokens = toks;
 }
 
-inline BencodeToken& BencodeDict::operator[](const ByteStringToken key)
+inline BencodeToken& BencodeDict::operator[](const ByteStringToken& key)
 {
     return *m_dict[key];
+}
+    
+inline const BencodeToken& BencodeDict::operator[](const ByteStringToken& key) const
+{
+    return *(m_dict.find(key)->second);
 }
 
 inline
