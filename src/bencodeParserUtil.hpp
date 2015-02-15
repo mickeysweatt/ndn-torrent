@@ -190,26 +190,27 @@ class BencodeList : public BencodeToken {
     
 class BencodeDict : public BencodeToken {
     // A value-sematantic type to represent dictionary bencdoe tokens. 
+  public:
+    // PUBLIC TYPES
+    typedef std::function<bool
+    (const BencodeByteStringToken&,
+     const BencodeByteStringToken&)>
+    BencodeDictComparator;
     
+    typedef std::map<BencodeByteStringToken,
+    BencodeToken*,
+    BencodeDictComparator>::const_iterator
+    const_iterator;
+  private:
     // DATA
     std::map<BencodeByteStringToken,
              BencodeToken*,
              BencodeDictComparator> m_dict;
-  private:
+
     // PRIVATE MANIPULATORS
     BencodeToken& operator[](const BencodeByteStringToken& key);
 
   public:
-    // PUBLIC TYPES
-    typedef std::function<bool
-        (const BencodeByteStringToken&,
-         const BencodeByteStringToken&)> 
-    BencodeDictComparator;
-    
-    typedef std::map<BencodeByteStringToken,
-                     BencodeToken*, 
-                     BencodeDictComparator>::const_iterator
-    const_iterator;
 
     // PUBLIC CLASS MEMBERS
     static BencodeDictComparator keyComparator;
