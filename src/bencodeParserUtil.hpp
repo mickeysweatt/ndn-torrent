@@ -135,7 +135,10 @@ class BencodeDict : public BencodeToken {
   public:
     typedef std::function<bool(const ByteStringToken&,
                                const ByteStringToken&)> BencodeDictComparator;
-  
+    
+    typedef std::map<ByteStringToken, BencodeToken*, BencodeDictComparator>::const_iterator const_iterator;
+    typedef std::map<ByteStringToken, BencodeToken*, BencodeDictComparator>::iterator       iterator;
+    
     static BencodeDictComparator keyComparator;
     
     BencodeDict();
@@ -150,11 +153,19 @@ class BencodeDict : public BencodeToken {
     
     BencodeToken& operator[](const ByteStringToken& key);
     
-    const BencodeToken& operator[](const ByteStringToken& key) const;
+    const_iterator find(const ByteStringToken& key) const;
+    
+    iterator find(const ByteStringToken& key);
     
     const std::map<ByteStringToken,
                    BencodeToken*,
                    BencodeDictComparator>& getValues() const;
+    
+    const_iterator begin() const;
+    const_iterator end()   const;
+    
+    iterator begin();
+    iterator end();
     
   private:
     std::map<ByteStringToken,
@@ -255,11 +266,36 @@ inline BencodeToken& BencodeDict::operator[](const ByteStringToken& key)
     return *m_dict[key];
 }
     
-inline const BencodeToken& BencodeDict::operator[](const ByteStringToken& key) const
+inline BencodeDict::const_iterator BencodeDict::find(const ByteStringToken& key) const
 {
-    return *(m_dict.find(key)->second);
+    return m_dict.find(key);
 }
 
+inline BencodeDict::iterator BencodeDict::find(const ByteStringToken& key)
+{
+    return m_dict.find(key);
+}
+    
+inline BencodeDict::const_iterator BencodeDict::begin() const
+{
+    return m_dict.begin();
+}
+    
+inline BencodeDict::const_iterator BencodeDict::end() const
+{
+    return m_dict.end();
+}
+
+inline BencodeDict::iterator BencodeDict::begin()
+{
+    return m_dict.begin();
+}
+
+inline BencodeDict::iterator BencodeDict::end()
+{
+    return m_dict.end();
+}
+    
 inline
 bool operator==(const ByteStringToken& lhs, const ByteStringToken& rhs)
 {
