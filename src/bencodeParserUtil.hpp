@@ -318,6 +318,19 @@ BencodeByteStringToken::~BencodeByteStringToken()
 {
 }
 
+inline
+BencodeByteStringToken::BencodeByteStringToken(const char *buffer, 
+                                               size_t     length)
+: m_value(buffer, buffer + length)
+{
+}
+
+inline
+BencodeByteStringToken::BencodeByteStringToken(std::string& str)
+: m_value(str.begin(), str.end())
+{
+}
+
 inline 
 const std::vector<char>& BencodeByteStringToken::getValue() const
 {
@@ -328,6 +341,12 @@ template<size_t Size>
 BencodeByteStringToken::BencodeByteStringToken(const char(& array)[Size])
 : m_value(array, array + Size - 1)
 {
+}
+
+inline
+std::string BencodeByteStringToken::getString() const
+{
+    return std::move(std::string(m_value.begin(), m_value.end()));
 }
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -

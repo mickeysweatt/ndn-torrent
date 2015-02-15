@@ -7,6 +7,9 @@ using std::list;
 using std::string;
 
 namespace torrent {
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+//                       BencodeParserUtil
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
     BencodeToken& BencodeParserUtil::parseStream(std::istream& ifs) {
         BencodeToken *curr_tok_p = nullptr;
         char   type;
@@ -34,7 +37,10 @@ namespace torrent {
         }
         return *curr_tok_p;
     }
-    
+
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+//                       BencodeIntegerToken
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
     BencodeIntegerToken::BencodeIntegerToken(std::istream& in)
     {
         string int_buff;
@@ -57,18 +63,10 @@ namespace torrent {
         }
         m_value = atoi(int_buff.c_str());
     }
-    
-    BencodeByteStringToken::BencodeByteStringToken(const char *buffer, 
-                                                   size_t     length)
-    : m_value(buffer, buffer + length)
-    {
-    }
-    
-    BencodeByteStringToken::BencodeByteStringToken(std::string& str)
-    : m_value(str.begin(), str.end())
-    {
-    }
-    
+
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+//                       BencodeByteStringToken
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -  
     BencodeByteStringToken::BencodeByteStringToken(std::istream& in){
         string length_str;
         int length;
@@ -96,11 +94,10 @@ namespace torrent {
         m_value.size();
         delete [] buffer;
     }
-    
-    string BencodeByteStringToken::getString() const {
-        return std::move(string(m_value.begin(), m_value.end()));
-    }
-    
+
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+//                               BencodeList
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
     BencodeList::BencodeList(std::istream& in)
     {
         BencodeToken* curr_tok;
@@ -115,7 +112,10 @@ namespace torrent {
         }
         in.get();
     }
-    
+
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+//                              BencodeDict
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
     BencodeDict::BencodeDictComparator BencodeDict::keyComparator =
     [] (const BencodeByteStringToken& lhs, const BencodeByteStringToken& rhs)
     {

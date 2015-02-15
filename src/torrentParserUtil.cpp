@@ -13,39 +13,40 @@ using std::list;
 using std::set;
 using std::pair;
 using std::vector;
+using std::map;
 
+//==============================================================================
+//                    STATIC HELPER FUNCTION DECLARATIONS
+//==============================================================================
 namespace torrent {
-    static std::set<string> getAnnounceList(
-                                           const BencodeList* announceListToken)
-    {
-        std::set<string> announcelist;
-        list<BencodeToken *> tempList1, tempList2;
-        BencodeList *curr_list;
-        
-        if (nullptr == announceListToken) {
-            throw TorrentParserUtil::ParseError("announce-list illformatted");
-        }
-        tempList1 = announceListToken->getTokens();
-        //unpack announce-list
-        for (auto it : tempList1) {
-            curr_list = dynamic_cast<BencodeList *>(it);
-            if (nullptr == curr_list) {
-                throw TorrentParserUtil::ParseError(
-                                                  "announce-list illformatted");
-            }
-            for (auto it2 : curr_list->getTokens()) {
-                tempList2.push_back((it2));
-            }
-        }
-        // grab strings from unpacked list
-        for (auto it : tempList2) {
-            announcelist.insert(
-                dynamic_cast<BencodeByteStringToken *>(it)->getString());
-        }
-        return std::move(announcelist);
-    }
+    static bool isMultieFileTorrent(const BencodeDict& infoDict);
     
-    static bool isMultieFileTorrent(const BencodeDict& infoDict) {
+    static void getInfoCommon(const BencodeDict& infoDict,
+                              std::string&       name,
+                              int&               pieceLength,
+                              std::vector<char>& pieces);
+
+    static void getInfoMultiFileTorrent(const BencodeDict&        infoDict,
+                                        set<pair<string, size_t>> files,
+                                        string&                   name,
+                                        int&                      pieceLength,
+                                        vector<char>&             pieces);
+
+    static void getInfoSingleFileTorrent(const BencodeDict& infoDict,
+                                         int&               fileLength,
+                                         std::string&       name,
+                                         int&               pieceLength,
+                                         std::vector<char>& pieces);
+
+    static set<string> getAnnounceList(const BencodeList* announceListToken);
+}
+
+//==============================================================================
+//                    STATIC HELPER FUNCTIONS DEFINITIONS
+//==============================================================================
+namespace torrent {
+    static bool isMultieFileTorrent(const BencodeDict& infoDict) 
+    {
        return infoDict.end() == infoDict.find("length");
     }
     
@@ -106,6 +107,40 @@ namespace torrent {
         pieceLength = fileLengthToken->getValue();
     }
 
+    static set<string> getAnnounceList(const BencodeList* announceListToken)
+    {
+        std::set<string> announcelist;
+        list<BencodeToken *> tempList1, tempList2;
+        BencodeList *curr_list;
+        
+        if (nullptr == announceListToken) {
+            throw TorrentParserUtil::ParseError("announce-list illformatted");
+        }
+        tempList1 = announceListToken->getTokens();
+        //unpack announce-list
+        for (auto it : tempList1) {
+            curr_list = dynamic_cast<BencodeList *>(it);
+            if (nullptr == curr_list) {
+                throw TorrentParserUtil::ParseError(
+                                                  "announce-list illformatted");
+            }
+            for (auto it2 : curr_list->getTokens()) {
+                tempList2.push_back((it2));
+            }
+        }
+        // grab strings from unpacked list
+        for (auto it : tempList2) {
+            announcelist.insert(
+                dynamic_cast<BencodeByteStringToken *>(it)->getString());
+        }
+        return std::move(announcelist);
+    }
+}
+
+namespace torrent {
+//==============================================================================
+//                           TorrentParserUtil
+//==============================================================================
     Torrent&& TorrentParserUtil::parseFile(std::istream& in)
     {
         Torrent t;
