@@ -2,6 +2,7 @@
 #define INCLUDED_TORRENT_HPP
 
 #include <list>
+#include <vector>
 #include <string>
 #include <chunkInfo.hpp>
 
@@ -10,8 +11,12 @@ namespace torrent {
 class Chunk;
 
 class Torrent {
+    
+    typedef std::pair<std::string, size_t> FileTuple;
+    
     // A value-semantic attribute class for torrents. 
   public:
+    
     // CREATORS
     Torrent();
     // Create an empty 'torrent'.
@@ -21,10 +26,15 @@ class Torrent {
 
     Torrent(std::list<std::string>& announceList, 
             std::string&            name,
-            size_t                  pieceLength/*,
-            std::vector<char>       pieces,
-            std::list<...>          fileList */
-           );
+            size_t                  pieceLength,
+            size_t                  fileLength,
+            std::vector<char>       pieces);
+    
+    Torrent(std::list<std::string>&              announceList,
+            std::string&                         name,
+            size_t                               pieceLength,
+            const std::vector<const FileTuple&>& fileTuples,
+            const std::vector<char>&             pieces);
     
     // ACCESSORS
     const std::list<std::string>& getAnnounceURLList() const;
