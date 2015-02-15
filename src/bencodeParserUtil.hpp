@@ -115,6 +115,9 @@ class ByteStringToken : public BencodeToken {
     
 class BencodeList : public BencodeToken {
   public:
+    typedef std::list<BencodeToken *>::iterator       iterator;
+    typedef std::list<BencodeToken *>::const_iterator const_iterator;
+    
     BencodeList();
         
     ~BencodeList();
@@ -126,6 +129,11 @@ class BencodeList : public BencodeToken {
     const std::list<BencodeToken *>& getTokens() const;
         
     void setTokens(const std::list<BencodeToken *>& toks);
+    
+    const_iterator begin() const;
+    const_iterator end() const;
+    iterator       begin();
+    iterator       end();
   
   private:
     std::list<BencodeToken *> m_tokens;
@@ -259,6 +267,26 @@ inline const std::list<BencodeToken*>& BencodeList::getTokens() const
 inline void BencodeList::setTokens(const std::list<BencodeToken *> &toks)
 {
     m_tokens = toks;
+}
+    
+inline BencodeList::iterator BencodeList::begin()
+{
+    return m_tokens.begin();
+}
+
+inline BencodeList::iterator BencodeList::end()
+{
+    return m_tokens.end();
+}
+    
+inline BencodeList::const_iterator BencodeList::begin() const
+{
+    return m_tokens.begin();
+}
+
+inline BencodeList::const_iterator BencodeList::end() const
+{
+    return m_tokens.end();
 }
 
 inline BencodeToken& BencodeDict::operator[](const ByteStringToken& key)
