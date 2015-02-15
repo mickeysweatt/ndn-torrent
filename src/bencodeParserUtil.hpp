@@ -192,15 +192,16 @@ class BencodeDict : public BencodeToken {
     // A value-sematantic type to represent dictionary bencdoe tokens. 
   public:
     // PUBLIC TYPES
-    typedef std::function<bool
-    (const BencodeByteStringToken&,
-     const BencodeByteStringToken&)>
+    typedef std::function<bool(
+        const BencodeByteStringToken&,
+        const BencodeByteStringToken&)>
     BencodeDictComparator;
     
     typedef std::map<BencodeByteStringToken,
-    BencodeToken*,
-    BencodeDictComparator>::const_iterator
+                     BencodeToken*,
+                     BencodeDictComparator>::const_iterator
     const_iterator;
+    
   private:
     // DATA
     std::map<BencodeByteStringToken,
