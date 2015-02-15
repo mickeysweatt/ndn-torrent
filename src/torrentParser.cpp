@@ -34,7 +34,7 @@ namespace torrent {
         }
         // grab strings from unpacked list
         for (auto it : tempList2) {
-            announcelist.insert(dynamic_cast<ByteStringToken *>(it)->getString());
+            announcelist.insert(dynamic_cast<BencodeByteStringToken *>(it)->getString());
         }
         return std::move(announcelist);
     }
@@ -48,9 +48,9 @@ namespace torrent {
                               int&               pieceLength,
                               std::vector<char>& pieces)
     {
-        auto pieceLengthToken = dynamic_cast<const IntegerToken    *>(infoDict.find("piece length")->second);
-        auto nameToken        = dynamic_cast<const ByteStringToken *>(infoDict.find("name")->second);
-        auto piecesToken      = dynamic_cast<const ByteStringToken *>(infoDict.find("pieces")->second);
+        auto pieceLengthToken = dynamic_cast<const BencodeIntegerToken    *>(infoDict.find("piece length")->second);
+        auto nameToken        = dynamic_cast<const BencodeByteStringToken *>(infoDict.find("name")->second);
+        auto piecesToken      = dynamic_cast<const BencodeByteStringToken *>(infoDict.find("pieces")->second);
         name        = nameToken->getString();
         pieceLength = pieceLengthToken->getValue();
         pieces      = piecesToken->getValue();
@@ -66,13 +66,13 @@ namespace torrent {
         for (auto file : fileListToken->getTokens()) {
             auto fileDict = dynamic_cast<const BencodeDict&>(*file);
             std::string pathString = "";
-            auto path = dynamic_cast<const BencodeList &>(fileDict["path"]);
-            auto pathCompnents = path.getTokens();
-            for (auto pathComponent : path.getTokens()) {
-                pathString += dynamic_cast<const ByteStringToken *>(pathComponent)->getString() +
+            auto path = dynamic_cast<const BencodeList *>(fileDict.find("path")->second);
+            auto pathCompnents = path->getTokens();
+            for (auto pathComponent : *path) {
+                pathString += dynamic_cast<const BencodeByteStringToken *>(pathComponent)->getString() +
                 (pathComponent == pathCompnents.back() ? "" : "/" );
             }
-            auto length = dynamic_cast<const IntegerToken &>(fileDict["length"]).getValue();
+            auto length = dynamic_cast<const BencodeIntegerToken *>(fileDict.find("length")->second)->getValue();
             files.insert(std::pair<string, size_t>(pathString, length));
         }
         getInfoCommon(infoDict, name, pieceLength, pieces);
@@ -85,7 +85,7 @@ namespace torrent {
                                          std::vector<char>& pieces)
     {
         getInfoCommon(infoDict, name, pieceLength, pieces);
-        auto fileLengthToken  = dynamic_cast<const IntegerToken *>(infoDict.find("length")->second);
+        auto fileLengthToken  = dynamic_cast<const BencodeIntegerToken *>(infoDict.find("length")->second);
         pieceLength = fileLengthToken->getValue();
     }
 
@@ -93,13 +93,13 @@ namespace torrent {
     {
         Torrent t;
         BencodeDict *ast;
-        ByteStringToken *announceToken;
+        BencodeByteStringToken *announceToken;
         std::set<string> announceList;
         std::set<std::pair<std::string, size_t>> files;
         int piece_length, fileLength;
         string name;
         std::vector<char> pieces;
-        std::map<ByteStringToken, BencodeToken*, BencodeDict::BencodeDictComparator> torrentDict;
+        std::map<BencodeByteStringToken, BencodeToken*, BencodeDict::BencodeDictComparator> torrentDict;
         
         if (!in.good()) {
             throw new ParseError("Bad stream");
@@ -109,14 +109,16 @@ namespace torrent {
             throw new ParseError("Illformed torrent file");
         }
         torrentDict = ast->getValues();
-        announceToken = dynamic_cast<ByteStringToken *>(torrentDict["announce"]);
+        announceToken = dynamic_cast<BencodeByteStringToken *>(torrentDict["announce"]);
         announceList = getAnnounceList(dynamic_cast<BencodeList *>(
                                                                    torrentDict["announce-list"]));
         announceList.insert(announceToken->getString());
         if (isMultieFileTorrent(dynamic_cast<BencodeDict&>(*torrentDict["info"]))) {
             getInfoMultiFileTorrent(dynamic_cast<BencodeDict&>(*torrentDict["info"]), files, name, piece_length, pieces);
         }
-        getInfoSingleFileTorrent(dynamic_cast<BencodeDict&>(*torrentDict["info"]), fileLength, name, piece_length, pieces);
+        else {
+            getInfoSingleFileTorrent(dynamic_cast<BencodeDict&>(*torrentDict["info"]), fileLength, name, piece_length, pieces);
+        }
         return std::move(t);
      }
 }
