@@ -1,4 +1,4 @@
-#include <torrentParser.hpp>
+#include <torrentParserUtil.hpp>
 #include <sstream>
 #include <fstream>
 #include <vector>

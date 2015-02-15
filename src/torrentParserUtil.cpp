@@ -1,4 +1,4 @@
-#include <torrentParser.hpp>
+#include <TorrentParserUtil.hpp>
 #include <torrent.hpp>
 #include <istream>
 #include <bencodeParserUtil.hpp>
