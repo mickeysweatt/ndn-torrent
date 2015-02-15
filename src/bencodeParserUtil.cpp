@@ -1,11 +1,4 @@
-//
-//  BencodeParser.cpp
-//  Torrent
-//
-//  Created by admin on 2/10/15.
-//  Copyright (c) 2015 admin. All rights reserved.
-//
-
+// bencdeParserUtil.cpp                                                -*-C++-*-
 #include <bencodeParserUtil.hpp>
 #include <string>
 #include <istream>
@@ -65,7 +58,8 @@ namespace torrent {
         m_value = atoi(int_buff.c_str());
     }
     
-    BencodeByteStringToken::BencodeByteStringToken(const char *buffer, size_t length)
+    BencodeByteStringToken::BencodeByteStringToken(const char *buffer, 
+                                                   size_t     length)
     : m_value(buffer, buffer + length)
     {
     }
@@ -88,8 +82,9 @@ namespace torrent {
         }
         while(':' != (c = in.get())) {
             if (!isdigit(c)) {
-                throw new BencodeParserUtil::ParseError("Attempting to construct integer "
-                                                        "token from illformed string");
+                throw new BencodeParserUtil::ParseError(
+                                              "Attempting to construct integer "
+                                              "token from illformed string");
             }
             length_str += c;
         }
@@ -149,7 +144,8 @@ namespace torrent {
     
     const std::map<BencodeByteStringToken,
                    BencodeToken*,
-                   BencodeDict::BencodeDictComparator>& BencodeDict::getValues() const
+                   BencodeDict::BencodeDictComparator>& 
+    BencodeDict::getValues() const
     {
         return m_dict;
     }

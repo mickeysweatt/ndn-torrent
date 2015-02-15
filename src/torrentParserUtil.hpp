@@ -1,3 +1,4 @@
+// torrentParserUtil.hpp                                               -*-C++-*-
 #ifndef INCLUDED_TORRENT_PARSER_HPP
 #define INCLUDED_TORRENT_PARSER_HPP
 
@@ -12,18 +13,18 @@
 //..
 //     <https://en.wikipedia.org/wiki/Torrent_file>
 //..
+//
 
 #include <string>
 #include <stdexcept>
-#include <exception>
 
 namespace torrent {
 
 class Torrent;
 
 class TorrentParserUtil {
+  // A utility for parsing torrent files.
 
-  
   public:
     // PUBLIC CLASS METHODS
     static Torrent&& parseFile(std::istream& in);

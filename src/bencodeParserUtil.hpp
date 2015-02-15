@@ -1,6 +1,6 @@
-// bencdeParser.hpp                                                    -*-C++-*-
-#ifndef INCLUDED_BENCODE_PARSER
-#define INCLUDED_BENCODE_PARSER
+// bencdeParserUtil.hpp                                                -*-C++-*-
+#ifndef INCLUDED_BENCODE_PARSER_UTIL
+#define INCLUDED_BENCODE_PARSER_UTIL
 
 //@PURPOSE: Provide a parser for bencode encoded data
 //
@@ -12,9 +12,12 @@
 //  BencodeList: a list of bencode tokens
 //  BencodeDict: a dictionary with string keys and bencode token values
 
-//@DESCRIPTION: This component defines a BencodeParser and all types for each
-// unique token supported in Bencode.  For more information about bencode see
-// the following description:
+//@DESCRIPTION: This component defines utility for parsing be Bencode encoded 
+// stream, 'bencodeParserUtil', as was a value sematantic type for each
+// unique token supported in Bencode: integer, byte string, list, and dictionary
+// are each respectively:'BencodeIntegerIntegerToken', 'BencodeByteStringToken', 
+// BencodeList', and 'BencodeDict'.  For more information about bencode see the
+// following description:
 //..
 // <https://en.wikipedia.org/wiki/Bencode>
 //..
