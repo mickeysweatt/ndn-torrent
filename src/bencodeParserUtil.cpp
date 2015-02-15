@@ -21,7 +21,7 @@ namespace torrent {
         
         switch(type) {
             case 'i': {
-                curr_tok_p = new IntegerToken(ifs);
+                curr_tok_p = new BencodeIntegerToken(ifs);
             } break;
             case 'l' : {
                 curr_tok_p = new BencodeList(ifs);
@@ -32,7 +32,7 @@ namespace torrent {
             default: {
                 // byte string
                 if (isdigit(type)) {
-                    curr_tok_p = new ByteStringToken(ifs);
+                    curr_tok_p = new BencodeByteStringToken(ifs);
                 }
                 else {
                     throw new ParseError("Unrecognized type.");
@@ -42,7 +42,7 @@ namespace torrent {
         return *curr_tok_p;
     }
     
-    IntegerToken::IntegerToken(std::istream& in)
+    BencodeIntegerToken::BencodeIntegerToken(std::istream& in)
     {
         string int_buff;
         char c;
@@ -62,20 +62,20 @@ namespace torrent {
             }
             int_buff += c;
         }
-        setValue(atoi(int_buff.c_str()));
+        m_value = atoi(int_buff.c_str());
     }
     
-    ByteStringToken::ByteStringToken(const char *buffer, size_t length)
+    BencodeByteStringToken::BencodeByteStringToken(const char *buffer, size_t length)
     : m_value(buffer, buffer + length)
     {
     }
     
-    ByteStringToken::ByteStringToken(std::string& str)
+    BencodeByteStringToken::BencodeByteStringToken(std::string& str)
     : m_value(str.begin(), str.end())
     {
     }
     
-    ByteStringToken::ByteStringToken(std::istream& in){
+    BencodeByteStringToken::BencodeByteStringToken(std::istream& in){
         string length_str;
         int length;
         char c;
@@ -102,7 +102,7 @@ namespace torrent {
         delete [] buffer;
     }
     
-    string ByteStringToken::getString() const {
+    string BencodeByteStringToken::getString() const {
         return std::move(string(m_value.begin(), m_value.end()));
     }
     
@@ -122,7 +122,7 @@ namespace torrent {
     }
     
     BencodeDict::BencodeDictComparator BencodeDict::keyComparator =
-    [] (const ByteStringToken& lhs, const ByteStringToken& rhs)
+    [] (const BencodeByteStringToken& lhs, const BencodeByteStringToken& rhs)
     {
         return lhs.getValue() < rhs.getValue();
     };
@@ -130,13 +130,13 @@ namespace torrent {
     BencodeDict::BencodeDict(std::istream& in) : m_dict(keyComparator)
     {
         BencodeToken *value;
-        ByteStringToken *key;
+        BencodeByteStringToken *key;
         if ('d' != in.peek()) {
             throw new BencodeParserUtil::ParseError("Bad dict");
         }
         in.get();
         while ('e' != in.peek()) {
-            key = dynamic_cast<ByteStringToken *>(
+            key = dynamic_cast<BencodeByteStringToken *>(
                                            &BencodeParserUtil::parseStream(in));
             if (nullptr == key) {
                 throw new BencodeParserUtil::ParseError("Bad key");
@@ -147,7 +147,7 @@ namespace torrent {
         in.get();
     }
     
-    const std::map<ByteStringToken,
+    const std::map<BencodeByteStringToken,
                    BencodeToken*,
                    BencodeDict::BencodeDictComparator>& BencodeDict::getValues() const
     {
