@@ -19,9 +19,9 @@ public:
 	// Destroys this object
 
 	// ACCESSORS
-	size_t getChunkId(); // Get Chunk Id
+	size_t getChunkId() const;     // Get Chunk Id
 
-	SHA1Hash getChunkHash(); // Get Chunk Hash Value
+	SHA1Hash getChunkHash() const; // Get Chunk Hash Value
 
 	//std::list<FilePiece> getChunkFileList(); 
 	//Returns a list of 'FilePiece' contained in the Chunk
@@ -35,8 +35,8 @@ private:
 };
 
 // INLINE ACCESSORS
-inline size_t ChunkInfo::getChunkId() { return m_id; }
-inline SHA1Hash ChunkInfo::getChunkHash() { return m_hash; }
+inline size_t ChunkInfo::getChunkId() const { return m_id; }
+inline SHA1Hash ChunkInfo::getChunkHash() const { return m_hash; }
 //inline std::list<FilePiece> ChunkInfo::getChunkFileList() { return m_file_pieces; }
 
 }
