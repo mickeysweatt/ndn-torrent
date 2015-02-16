@@ -3,6 +3,7 @@
 
 #include <ndn-cxx/contexts/producer-context.hpp>
 
+#include <chunk.hpp>
 #include <torrentClientProto.hpp>
 
 #include <list>
@@ -15,9 +16,6 @@ const char TORRENT_NAMESPACE[] = "/torrent";
 
 namespace torrent {
 
-typedef int chunkId;
-
-class Chunk;
 class ChunkInfo;
 
 class Seeder {
@@ -25,8 +23,13 @@ class Seeder {
    // It will respond to interest packets for chunks that it can upload.
 public:
    // CREATORS
-   explicit Seeder(TorrentClientProtocol& clientProtocol);
-   // Create a Seeder that communicates with clientProtocol.
+	 explicit Seeder(TorrentClientProtocol& clientProtocol);
+	 // Create a Seeder that communicates with clientProtocol.
+
+   Seeder(TorrentClientProtocol& clientProtocol,
+					const std::string& prefix);
+   // Create a Seeder that communicates with clientProtocol, and seeds using the
+	 // given prefix.
 
    ~Seeder();
    // Destroy this object.
@@ -42,7 +45,11 @@ public:
 private:
    // DATA
    TorrentClientProtocol& m_clientProtocol;
-	 std::unordered_map<chunkId, std::unique_ptr<ndn::Producer>> m_producers;
+	 std::unordered_map<size_t, std::unique_ptr<ndn::Producer>> m_producers;
+	 std::unordered_map<size_t, Chunk> m_chunks;
+	 std::string m_prefix;
+
+	 // PRIVATE FUNCTIONS
 	 void onInterest(ndn::Interest& interest);
 };
 
@@ -50,9 +57,19 @@ private:
 //                       INLINE FUNCTION DEFINTIONS
 //==============================================================================
 
+/// TODO: Ideally this function shouldn't exist, but need to consult with group
+/// on changing the interface.
 inline Seeder::Seeder(TorrentClientProtocol& clientProtocol)
 	 : m_clientProtocol(clientProtocol)
 {
+	 m_prefix = "/torrent/file/";
+}
+
+inline Seeder::Seeder(TorrentClientProtocol& clientProtocol,
+											const std::string& prefix)
+	 : m_clientProtocol(clientProtocol), m_prefix(prefix)
+{
+	 /// TODO: Parse prefix to ensure it's a valid prefix?
 }
 
 inline Seeder::~Seeder()

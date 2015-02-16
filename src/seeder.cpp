@@ -3,7 +3,7 @@
 #include <ndn-cxx/name.hpp>
 
 #include "chunk.hpp"
-#include "chunkInfo.hpp"
+#include "chunkinfo.hpp"
 #include "seeder.hpp"
 
 #include <list>
@@ -16,28 +16,50 @@ int Seeder::upload(const std::list<Chunk>& chunkDataList)
 {
 	 for (auto iter = chunkDataList.begin(); iter != chunkDataList.end(); iter++)
 	 {
-			/// TODO: When ChunkInfo is defined, insert its ID as the key.
-			int id = 0;
-			/// TODO: When ChunkInfo is defined, generate a name.
-			ndn::Name chunkName(std::string(TORRENT_NAMESPACE) + std::to_string(id));
-			m_producers.insert(std::make_pair(id, std::move(std::unique_ptr<ndn::Producer>(new ndn::Producer(chunkName)))));
-			std::unique_ptr<ndn::Producer>& chunkProducer = m_producers[id];
+			size_t id = iter->getMetadata().getChunkId();
+			ndn::Name chunkName(m_prefix + std::to_string(id));
+			std::unique_ptr<ndn::Producer> chunkProducer(new ndn::Producer(chunkName));
+			chunkProducer->setContextOption(INTEREST_ENTER_CNTX,
+																			std::bind(&Seeder::onInterest, this, _1));
 
-			chunkProducer->setContextOption(INTEREST_ENTER_CNTX, (ndn::InterestCallback)std::bind(&Seeder::onInterest, this, _1));
+			m_producers.insert(std::make_pair(id, std::move(chunkProducer)));
+			m_chunks.insert(std::make_pair(id, *iter));
 	 }
 	 return 0;
 }
 
 int Seeder::stopUploading(const std::list<ChunkInfo>& chunkInfoList)
 {
+	 int retVal = 0;
 	 for (auto iter = chunkInfoList.begin(); iter != chunkInfoList.end(); iter++)
 	 {
+			size_t id = iter->getChunkId();
+			if (!m_producers.count(id))
+			{
+				 retVal = 1; // Chunk ID not found
+				 continue;
+			}
+
+			/// TODO: Doesn't seem like CP API actually detaches producer from network
+			m_producers.erase(id);
+			m_chunks.erase(id);
 	 }
 	 return 0;
 }
 
 void Seeder::onInterest(ndn::Interest& interest)
 {
+	 const ndn::Name name = interest.getName();
+	 size_t lastComponentIndex = name.size() - 1;
+	 size_t id = name.get(lastComponentIndex).toNumber();
+
+	 // Drop interest if we don't have a suitable producer
+	 if (!m_chunks.count(id))
+			return;
+			
+	 const std::vector<char>& buffer = m_chunks[id].getBuffer();
+	 std::unique_ptr<ndn::Producer>& producer = m_producers[id];
+	 producer->produce(name, (uint8_t*)buffer.data(), buffer.size());
 }
 
 }

@@ -1,7 +1,7 @@
 #ifndef INCLUDED_CHUNK_HPP
 #define INCLUDED_CHUNK_HPP
 
-#include "chunkInfo.hpp"
+#include "chunkinfo.hpp"
 #include <vector>
 
 namespace torrent {
