@@ -1,10 +1,11 @@
 #include <torrentClient.hpp>
-#include <torrentParser.hpp>
+#include <torrentParserUtil.hpp>
 #include <chunkInfo.hpp>
 #include <chunk.hpp>
 #include <torrent.hpp>
 #include <fstream>
 #include <vector>
+#include <sha1hash.hpp>
 
 using namespace std;
 
@@ -66,14 +67,14 @@ namespace torrent {
                     // Check the checksum of this part of the file.
                     // If the checksum matches, we have already downloaded
                     // this chunk: upload instead of downloading it.
-                    /*if (chunkInfo.getChunkHash() == SHA1(buffer, amount_read)) {
+                    if (chunkInfo.getChunkHash() == SHA1Hash((unsigned char *)(buffer), amount_read)) {
                         m_uploadList.push_back(
                             Chunk(chunkInfo,
                                   vector<char>(buffer, buffer + amount_read)));
                     }
-                    else {*/
+                    else {
                         m_downloadList.push_back(chunkInfo);
-                    /*}*/
+                    }
                     
                 //}
                 //catch () {

@@ -47,7 +47,7 @@ class Torrent {
     size_t getPieceLength() const;
     // Return the length of each piece in this torrent.
 
-    //const std::list<Chunk>& getChunks() const;
+    const std::list<ChunkInfo>& getChunks() const;
     // Return a list of all the chunks in this torrent.
   
   private:
