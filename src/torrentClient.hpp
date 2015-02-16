@@ -1,8 +1,12 @@
 #ifndef INCLUDED_TORRENT_CLIENT_HPP
 #define INCLUDED_TORRENT_CLIENT_HPP
 
+#include <leecher.hpp>
+#include <seeder.hpp>
+#include <torrent.hpp>
 #include <torrentClientProto.hpp>
 #include <string>
+#include <list>
 
 namespace torrent {
 
@@ -12,7 +16,7 @@ namespace torrent {
 class TorrentClient : public TorrentClientProtocol {
   public:
     //CREATORS
-    explicit TorrentClient(const std::string& torrentFile,
+    TorrentClient(const std::string& torrentFile,
             const std::string& downloadLocation);
   
     // Override TorrentClientProtocol method
@@ -29,8 +33,13 @@ class TorrentClient : public TorrentClientProtocol {
     int stop();
   private:
     //DATA
-    std::string torrentFile;
-    std::string downloadLocation;
+    std::string m_downloadLocation;
+    Torrent m_torrent;
+    std::list<Chunk> m_uploadList;
+    std::list<ChunkInfo> m_downloadList;
+    Seeder m_seeder;
+    Leecher m_leecher;
+    bool m_uploading;
 };
 
 }
