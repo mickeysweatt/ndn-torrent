@@ -2,9 +2,9 @@
 #include <ndn-cxx/contexts/context-options.hpp>
 #include <ndn-cxx/name.hpp>
 
-#include "chunk.hpp"
-#include "chunkinfo.hpp"
-#include "seeder.hpp"
+#include <chunk.hpp>
+#include <chunkInfo.hpp>
+#include <seeder.hpp>
 
 #include <list>
 #include <functional>
