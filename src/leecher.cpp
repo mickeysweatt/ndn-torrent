@@ -3,13 +3,18 @@
 #include <leecher.hpp>
 
 namespace torrent{
-   int download(const std::list<ChunkInfo>& chunkInfoList)
+   Leecher::Leecher(TorrentClientProtocol& clientProtocol)
+   : m_clientProtocol(clientProtocol)
+   {
+   }
+   Leecher::~Leecher() {}
+   int Leecher::download(const std::list<ChunkInfo>& chunkInfoList)
    {
 
    	return 0;
    }
 
-   int stopDownload(const std::list<ChunkInfo>& chunkInfoList)
+   int Leecher::stopDownload(const std::list<ChunkInfo>& chunkInfoList)
    {
 
    	return 0;
