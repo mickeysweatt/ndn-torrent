@@ -50,7 +50,8 @@ private:
 	 std::string m_prefix;
 
 	 // PRIVATE FUNCTIONS
-	 void onInterest(ndn::Interest& interest);
+	 void onInterest(const ndn::Interest& interest);
+	 void onCacheMiss(const ndn::Interest& interest);
 };
 
 //==============================================================================
