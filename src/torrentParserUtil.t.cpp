@@ -1,6 +1,7 @@
 // torrentParserUtil.t.cpp                                             -*-C++-*-
-
 #include <torrentParserUtil.hpp>
+#include <torrent.hpp>
+
 #include <sstream>
 #include <fstream>
 #include <vector>

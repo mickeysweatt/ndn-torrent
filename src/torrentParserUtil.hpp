@@ -27,7 +27,7 @@ class TorrentParserUtil {
 
   public:
     // PUBLIC CLASS METHODS
-    static Torrent&& parseFile(std::istream& in);
+    static Torrent parseFile(std::istream& in);
         // Parse the specified 'in' stream as a torrent file. Behavior is
         // undefined unless contents refers to a valid torrent file.
 

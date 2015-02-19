@@ -141,7 +141,7 @@ namespace torrent {
 //==============================================================================
 //                           TorrentParserUtil
 //==============================================================================
-    Torrent&& TorrentParserUtil::parseFile(std::istream& in)
+    Torrent TorrentParserUtil::parseFile(std::istream& in)
     {
         Torrent t;
         BencodeDict *ast;
