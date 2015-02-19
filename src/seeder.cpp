@@ -44,7 +44,7 @@ int Seeder::stopUploading(const std::list<ChunkInfo>& chunkInfoList)
 			m_producers.erase(id);
 			m_chunks.erase(id);
 	 }
-	 return 0;
+	 return retVal;
 }
 
 void Seeder::onInterest(ndn::Interest& interest)
