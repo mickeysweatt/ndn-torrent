@@ -12,6 +12,7 @@
 #include <unistd.h>
 
 using namespace torrent;
+using std::bind;
 
 static int numConsumed = 0;
 static bool success = true;
@@ -86,8 +87,11 @@ int testSeeder()
 	 while (numConsumed < N_PACKETS)
 			continue;
 
-	 if (success)
-			std::cout << "Seeder test successful" << std::endl;
-	 else
-			std::cout << "Seeder test failure" << std::endl;
+	 if (success) {
+	     std::cout << "Seeder test successful" << std::endl;
+	 }
+	 else {
+	     std::cout << "Seeder test failure" << std::endl;
+	 }
+	 return 0;
 }
