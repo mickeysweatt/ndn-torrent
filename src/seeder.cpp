@@ -9,6 +9,9 @@
 #include <list>
 #include <functional>
 #include <memory>
+#include <string>
+
+#include <iostream>
 
 namespace torrent {
 
@@ -20,7 +23,10 @@ int Seeder::upload(const std::list<Chunk>& chunkDataList)
 			ndn::Name chunkName(m_prefix + std::to_string(id));
 			std::unique_ptr<ndn::Producer> chunkProducer(new ndn::Producer(chunkName));
 			chunkProducer->setContextOption(INTEREST_ENTER_CNTX,
-																			std::bind(&Seeder::onInterest, this, _1));
+																			(ndn::ConstInterestCallback)std::bind(&Seeder::onInterest, this, _1));
+			chunkProducer->setContextOption(CACHE_MISS,
+																			(ndn::ConstInterestCallback)std::bind(&Seeder::onCacheMiss, this, _1));
+			chunkProducer->attach();
 
 			m_producers.insert(std::make_pair(id, std::move(chunkProducer)));
 			m_chunks.insert(std::make_pair(id, *iter));
@@ -47,19 +53,26 @@ int Seeder::stopUploading(const std::list<ChunkInfo>& chunkInfoList)
 	 return retVal;
 }
 
-void Seeder::onInterest(ndn::Interest& interest)
+void Seeder::onInterest(const ndn::Interest& interest)
+{
+}
+
+void Seeder::onCacheMiss(const ndn::Interest& interest)
 {
 	 const ndn::Name name = interest.getName();
 	 size_t lastComponentIndex = name.size() - 1;
-	 size_t id = name.get(lastComponentIndex).toNumber();
+	 size_t id = atoi(name.get(lastComponentIndex).toUri().c_str());
 
 	 // Drop interest if we don't have a suitable producer
 	 if (!m_chunks.count(id))
+	 {
+			std::cout << "Producer not found" << std::endl;
 			return;
+	 }
 			
 	 const std::vector<char>& buffer = m_chunks[id].getBuffer();
 	 std::unique_ptr<ndn::Producer>& producer = m_producers[id];
-	 producer->produce(name, (uint8_t*)buffer.data(), buffer.size());
+	 producer->produce(ndn::Name(), (uint8_t*)buffer.data(), buffer.size());
 }
 
 }
