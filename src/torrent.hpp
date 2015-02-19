@@ -18,11 +18,13 @@ class Torrent {
   public:
     
     // CREATORS
-    Torrent();
+    Torrent() = default;
     // Create an empty 'torrent'.
 
-    ~Torrent();
+    ~Torrent() = default;
     // Destroy this object.
+    
+    Torrent(const Torrent& other) = default;
 
     Torrent(std::list<std::string>& announceList, 
             std::string&            name,
@@ -35,6 +37,10 @@ class Torrent {
             size_t                               pieceLength,
             const std::vector<const FileTuple&>& fileTuples,
             const std::vector<char>&             pieces);
+    
+    Torrent(Torrent&& other);
+        // Move the value of the specified 'other' object into this
+        // object.
     
     // ACCESSORS
     const std::list<std::string>& getAnnounceURLList() const;
@@ -49,6 +55,12 @@ class Torrent {
 
     const std::list<ChunkInfo>& getChunks() const;
     // Return a list of all the chunks in this torrent.
+    
+    // MANIPULATORS
+    Torrent& operator=(Torrent&& rhs);
+        // Assign the value of the specified 'rhs' object to this value.
+    
+    Torrent& operator=(const Torrent& rhs) = default;
   
   private:
     // DATA
