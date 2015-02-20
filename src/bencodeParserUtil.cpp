@@ -71,7 +71,7 @@ namespace torrent {
         string length_str;
         int length;
         char c;
-        char *buffer;
+        //char *buffer;
         
         if (!isdigit(in.peek())) {
             throw BencodeParserUtil::ParseError("Attemptying to construct a "
@@ -87,12 +87,8 @@ namespace torrent {
             length_str += c;
         }
         length = atoi(length_str.c_str());
-        m_value.reserve(length);
-        buffer = new char[length];
-        in.read(buffer, length);
-        std::copy(buffer, buffer + length, std::back_inserter(m_value));
-        m_value.size();
-        delete [] buffer;
+        m_value.resize(length);
+        in.read(m_value.data(), length);
     }
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -

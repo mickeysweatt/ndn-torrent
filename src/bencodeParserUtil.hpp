@@ -5,17 +5,17 @@
 //@PURPOSE: Provide a parser for bencode encoded data
 //
 //@CLASSES:
-//  BencodeParserUtill: parser to convert bencode data into 'BencodeToken'  
+//  BencodeParserUtill: parser to convert bencode data into 'BencodeToken'
 //  BencodeToken: abstract base type for all bencode tokens
 //  BencodeIntegerToken: type for integear values
 //  BencodeByteStringToken: type for all byte strings
 //  BencodeList: a list of bencode tokens
 //  BencodeDict: a dictionary with string keys and bencode token values
 
-//@DESCRIPTION: This component defines utility for parsing be Bencode encoded 
+//@DESCRIPTION: This component defines utility for parsing be Bencode encoded
 // stream, 'bencodeParserUtil', as was a value sematantic type for each
 // unique token supported in Bencode: integer, byte string, list, and dictionary
-// are each respectively:'BencodeIntegerIntegerToken', 'BencodeByteStringToken', 
+// are each respectively:'BencodeIntegerIntegerToken', 'BencodeByteStringToken',
 // BencodeList', and 'BencodeDict'.  For more information about bencode see the
 // following description:
 //..
@@ -37,7 +37,7 @@ class BencodeToken;
 //                            =================
 //                            BencodeParserUtil
 //                            =================
-    
+
 class BencodeParserUtil {
   // A utility class for parsing bencode encoded data
   public:
@@ -48,30 +48,35 @@ class BencodeParserUtil {
         ParseError(const std::string &what);
           // Create a new 'ParseError' with the specified 'what' string.
     };
-    
+
     BencodeParserUtil() = delete;
         // No instances of this class should be built.
-    
+
     static BencodeToken& parseStream(std::istream& in);
-        // Parse the data in the specified 'in' strean and return a reference 
-        // to the first token. In the case of illformed data a 'ParseError' is 
-        // thrown.  Note that only the first token is parsed, and 'in' may 
-        // contain more than more token. 
+        // Parse the data in the specified 'in' strean and return a reference
+        // to the first token. In the case of illformed data a 'ParseError' is
+        // thrown.  Note that only the first token is parsed, and 'in' may
+        // contain more than more token.
 };
 
 //                            ======
-//                            Tokens   
+//                            Tokens
 //                            ======
 
 class BencodeToken {
   // Abstract base class for all bencode tokens.
   public:
     // CREATORS
-    BencodeToken();
+    BencodeToken() = default;
         // No one should construct a 'BencodeToken' instance.
-    
-    virtual ~BencodeToken() = 0;
+
+    virtual ~BencodeToken() = default;
         // Delete this object.
+
+    BencodeToken(const BencodeToken& other) = default;
+
+    // MANIPULATORS
+    BencodeToken& operator=(const BencodeToken& rhs) = default;
 };
 
 class BencodeIntegerToken : public BencodeToken {
@@ -79,14 +84,16 @@ class BencodeIntegerToken : public BencodeToken {
 
   // DATA
   int m_value;
-  
+
   public:
     // CREATORS
-    BencodeIntegerToken();
+    BencodeIntegerToken() = default;
         // Create an empty object.
 
-    virtual ~BencodeIntegerToken();
+    virtual ~BencodeIntegerToken() = default;
         // Destroy this object.
+
+    BencodeIntegerToken(const BencodeIntegerToken& other) = default;
 
     explicit BencodeIntegerToken(std::istream& in);
         // Create a 'BencodeIntegerToken' from the first token in the specified
@@ -96,16 +103,19 @@ class BencodeIntegerToken : public BencodeToken {
     // ACCESSORS
     int getValue() const;
         // Return the value held within this token.
+
+    // MANIPULATORS
+    BencodeIntegerToken& operator=(const BencodeIntegerToken& rhs) = default;
 };
-    
+
 class BencodeByteStringToken : public BencodeToken {
     // Unconstrainted value-semantic type to represent Bencode Byte string
-    // tokens. 
-  
+    // tokens.
+
   // FRIENDS
   friend bool operator==(const BencodeByteStringToken& lhs,
                          const BencodeByteStringToken& rhs);
-  
+
   friend bool operator!=(const BencodeByteStringToken& lhs,
                          const BencodeByteStringToken& rhs);
   // DATA
@@ -113,27 +123,29 @@ class BencodeByteStringToken : public BencodeToken {
 
   public:
     // CREATORS
-    BencodeByteStringToken();
+    BencodeByteStringToken() = default;
         // Create an empty object.
 
-    virtual ~BencodeByteStringToken();
+    virtual ~BencodeByteStringToken() = default;
         // Destroy this object.
-    
+
+    BencodeByteStringToken(const BencodeByteStringToken& other) = default;
+
     explicit BencodeByteStringToken(const char *buffer, size_t length);
         // Create a object with value of the first specified 'length' bytes of
         // the specified 'buffer'.
-    
+
     template<size_t Size>
     BencodeByteStringToken(const char(& array)[Size]);
-        // Create a new object with the value of the specified 'array'.  Note 
+        // Create a new object with the value of the specified 'array'.  Note
         // that this method is declared implicit for the sake of syntax sugar
         // and does not copy the null-byte.
-    
-    explicit 
+
+    explicit
     BencodeByteStringToken(std::string& str);
-        // Create an object with the value of the specified 'str' string. 
-        
-    explicit 
+        // Create an object with the value of the specified 'str' string.
+
+    explicit
     BencodeByteStringToken(std::istream& in);
         // Create an object with the value of the 'ByteStringToken' at the
         // start of the specified 'in' strem.
@@ -141,40 +153,46 @@ class BencodeByteStringToken : public BencodeToken {
     // ACCESSORS
     const std::vector<char>& getValue() const;
         // Return an unmodifiable reference to the internal buffer.
-    
+
     std::string getString() const;
         // Return a string with the content of this object. The behavior is
         // undefined unless the contents of this object are representable by
-        // a 'std::string'. 
+        // a 'std::string'.
+
+    // MANIPULATORS
+    BencodeByteStringToken&
+    operator=(const BencodeByteStringToken& rhs) = default;
 };
-    
+
 class BencodeList : public BencodeToken {
     // A value-semantic type for Bencode list tokens.
-  
+
     // DATA
     std::list<BencodeToken *> m_tokens;
-  
+
   public:
     // PUBLIC TYPES
     typedef std::list<BencodeToken *>::const_iterator const_iterator;
-    
+
     // CREATORS
-    BencodeList();
+    BencodeList() = default;
         // Create an empty object.
 
-    ~BencodeList();
+    virtual ~BencodeList() = default;
         // Destory this object.
 
-    explicit 
+    BencodeList(const BencodeList& other) = default;
+
+    explicit
     BencodeList(std::istream& in);
-        // Create a object with the value of the Bencode list token at the 
+        // Create a object with the value of the Bencode list token at the
         // start of the specified 'in' stream. The behavior is undefined unless
         // in begins with a valid Benocde list.
 
-    explicit 
+    explicit
     BencodeList(const std::list<BencodeToken*>& toks);
         // Construct a object with the value of the specified 'toks' list.
-        
+
     // ACCESSORS
     const std::list<BencodeToken *>& getTokens() const;
         // Return an unmodifiable reference to a list containing all the tokens
@@ -186,25 +204,28 @@ class BencodeList : public BencodeToken {
         // is a non-empty list.
 
     const_iterator end() const;
-        // Return a bi-directional iterator referencing one element past the 
-        // last element of this list. Note that this iterator cannot be 
+        // Return a bi-directional iterator referencing one element past the
+        // last element of this list. Note that this iterator cannot be
         // deferenced.
+
+    // MANIPULATORS
+    BencodeList& operator=(const BencodeList& rhs) = default;
 };
-    
+
 class BencodeDict : public BencodeToken {
-    // A value-sematantic type to represent dictionary bencdoe tokens. 
+    // A value-sematantic type to represent dictionary bencdoe tokens.
   public:
     // PUBLIC TYPES
     typedef std::function<bool(
         const BencodeByteStringToken&,
         const BencodeByteStringToken&)>
     BencodeDictComparator;
-    
+
     typedef std::map<BencodeByteStringToken,
                      BencodeToken*,
                      BencodeDictComparator>::const_iterator
     const_iterator;
-    
+
   private:
     // DATA
     std::map<BencodeByteStringToken,
@@ -218,47 +239,52 @@ class BencodeDict : public BencodeToken {
 
     // PUBLIC CLASS MEMBERS
     static BencodeDictComparator keyComparator;
-    
+
     // CREATORS
-    BencodeDict();
+    BencodeDict() = default;
         // Create an empty dictionary.
 
-    ~BencodeDict();
+    virtual ~BencodeDict() = default;
         // Destroy this object.
 
-    explicit 
+    BencodeDict(const BencodeDict& rhs) = default;
+
+    explicit
     BencodeDict(std::istream& in);
         // Create a dictionary with value of the bencode dictionary token that
         // the front of the specified 'in' stream. The behavior is unspecified
         // unless the front of the 'in' stream represents a valid Bencode
         // dictionary.
 
-    explicit 
-    BencodeDict(const std::map<BencodeByteStringToken, 
-                                BencodeToken *, 
+    explicit
+    BencodeDict(const std::map<BencodeByteStringToken,
+                                BencodeToken *,
                                 BencodeDictComparator>& dict);
         // Create a dictionary with the value of the specified 'dict'.
-    
+
     // ACCESSORS
     const_iterator find(const BencodeByteStringToken& key) const;
         // Return a iterator providing unmodifiable access to the element in
-        // this dictionary for the specified 'key'. Return 'end()'' if key not 
+        // this dictionary for the specified 'key'. Return 'end()'' if key not
         // in dictionary.
-    
+
     const std::map<BencodeByteStringToken,
                    BencodeToken*,
                    BencodeDictComparator>& getValues() const;
         // Return a map with the contents of this dictionary.
-    
+
     const_iterator begin() const;
         // Return a bi-directional iterator providing unmodifiable accesss to
-        // the first element in this dictionary. The iterator is only valid if 
+        // the first element in this dictionary. The iterator is only valid if
         // this is a non-empty dictionary.
-    
+
     const_iterator end() const;
-        // Return a bi-directional iterator referencing one element past the 
-        // last element of this dictionary. Note that this iterator cannot be 
+        // Return a bi-directional iterator referencing one element past the
+        // last element of this dictionary. Note that this iterator cannot be
         // deferenced.
+
+    // MANIPULATORS
+    BencodeDict& operator=(const BencodeDict& rhs) = default;
 };
 
 //==============================================================================
@@ -267,59 +293,27 @@ class BencodeDict : public BencodeToken {
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 //                       BencodeParserUtil::ParseError
-// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
-inline 
-BencodeParserUtil::ParseError::ParseError(const std::string& what) 
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+inline
+BencodeParserUtil::ParseError::ParseError(const std::string& what)
 : logic_error(what)
 {
 }
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-//                              BencodeToken
-// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
-inline 
-BencodeToken::BencodeToken()
-{
-}
-
-inline 
-BencodeToken::~BencodeToken()
-{
-}
-// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 //                            BencodeIntegerToken
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-inline 
-BencodeIntegerToken::BencodeIntegerToken()
-{
-}
-
-inline 
-BencodeIntegerToken::~BencodeIntegerToken()
-{
-}
-
-
 inline
 int BencodeIntegerToken::getValue() const
 {
     return m_value;
 }
+
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 //                            BencodeByteStringToken
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-inline 
-BencodeByteStringToken::BencodeByteStringToken()
-{
-}
-
-inline 
-BencodeByteStringToken::~BencodeByteStringToken()
-{
-}
-
 inline
-BencodeByteStringToken::BencodeByteStringToken(const char *buffer, 
+BencodeByteStringToken::BencodeByteStringToken(const char *buffer,
                                                size_t     length)
 : m_value(buffer, buffer + length)
 {
@@ -331,7 +325,7 @@ BencodeByteStringToken::BencodeByteStringToken(std::string& str)
 {
 }
 
-inline 
+inline
 const std::vector<char>& BencodeByteStringToken::getValue() const
 {
     return m_value;
@@ -352,29 +346,19 @@ std::string BencodeByteStringToken::getString() const
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 //                            BencodeList
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-inline 
-BencodeList::BencodeList()
-{
-}
-
-inline 
-BencodeList::~BencodeList()
-{
-}
-
-inline 
-BencodeList::BencodeList(const std::list<BencodeToken*>& toks) 
+inline
+BencodeList::BencodeList(const std::list<BencodeToken*>& toks)
 : m_tokens(toks)
 {
 }
 
-inline 
+inline
 const std::list<BencodeToken*>& BencodeList::getTokens() const
 {
     return m_tokens;
 }
-    
-inline 
+
+inline
 BencodeList::const_iterator BencodeList::begin() const
 {
     return m_tokens.begin();
@@ -389,44 +373,34 @@ BencodeList::const_iterator BencodeList::end() const
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 //                            BencodeDict
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-inline 
-BencodeDict::BencodeDict() : m_dict(keyComparator)
-{
-}
-
-inline 
-BencodeDict::~BencodeDict()
-{
-}
-
-inline 
+inline
 BencodeDict::BencodeDict(const std::map<BencodeByteStringToken,
                                         BencodeToken*,
                                         BencodeDictComparator>& dict)
+: m_dict(dict)
 {
-    m_dict = dict;
 }
 
-inline 
+inline
 BencodeToken& BencodeDict::operator[](const BencodeByteStringToken& key)
 {
     return *m_dict[key];
 }
-    
+
 inline
-BencodeDict::const_iterator 
+BencodeDict::const_iterator
 BencodeDict::find(const BencodeByteStringToken& key) const
 {
     return m_dict.find(key);
 }
- 
-inline 
+
+inline
 BencodeDict::const_iterator BencodeDict::begin() const
 {
     return m_dict.begin();
 }
-    
-inline 
+
+inline
 BencodeDict::const_iterator BencodeDict::end() const
 {
     return m_dict.end();
@@ -436,18 +410,18 @@ BencodeDict::const_iterator BencodeDict::end() const
 //                          FRIENDS
 //==============================================================================
 inline
-bool operator==(const BencodeByteStringToken& lhs, 
+bool operator==(const BencodeByteStringToken& lhs,
                 const BencodeByteStringToken& rhs)
 {
     return lhs.m_value == rhs.m_value;
 }
 
 inline
-bool operator!=(const BencodeByteStringToken& lhs, 
+bool operator!=(const BencodeByteStringToken& lhs,
                 const BencodeByteStringToken& rhs)
 {
     return lhs.m_value != rhs.m_value;
 }
 
 } // end of torrent namespace
-#endif 
+#endif

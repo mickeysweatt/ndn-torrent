@@ -10,7 +10,7 @@ class FilePiece
 {
   public:
   	// CREATORS
-  	FilePiece();
+  	FilePiece() = default;
 
   	FilePiece(std::string name, size_t start, size_t end, size_t length);
 
