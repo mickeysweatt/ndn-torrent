@@ -7,18 +7,21 @@
 
 namespace torrent {
 
+// REVIEW: Forward declaration redundant with the include
 class ChunkInfo;
 
 class Chunk {
 	 // A class that contains metadata and the actual data on a chunk.
 public:
 	 // CREATORS
+// REVIEW: Switch these to '=default'
 	 Chunk();
 	 // Creates an empty chunk.
 
 	 Chunk(const ChunkInfo& metadata, const std::vector<char>& buffer);
 	 // Creates a chunk and initializes the metadata and data.
 
+// REVIEW: Switch these to '=default'
 	 ~Chunk();
 	 // Destroys this object.
 
@@ -72,12 +75,14 @@ inline const std::vector<char>& Chunk::getBuffer() const
 	 return *m_buffer;
 }
 
+// REVIEW: Why the return code? Does not sem to be doing anything
 inline int Chunk::setMetadata(const ChunkInfo& metadata)
 {
 	 m_metadata = metadata;
 	 return -1;
 }
 
+// REVIEW: Why the return code? Does not sem to be doing anything
 inline int Chunk::setBuffer(const std::vector<char>& buffer)
 {
 	 m_buffer = std::shared_ptr<std::vector<char>>(new std::vector<char>(buffer));
@@ -87,3 +92,9 @@ inline int Chunk::setBuffer(const std::vector<char>& buffer)
 } // namespace torrent
 
 #endif // INCLUDED_CHUNK_HPP
+
+
+// REVIEW: Return codes should either be removed or made useful and explained, 
+// and the default ctor and destructor should be just declared as the default 
+// (my bad on the bad example) for the sake of alloiwng zero initialization and
+// not depricating the default ctor (which you should also declare)
