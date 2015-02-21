@@ -10,7 +10,7 @@
 using namespace std;
 
 namespace torrent {
-
+// REVIEW: Re-order to match order of declaration
     //Parse the torrent file, but don't do anything else.
     TorrentClient::TorrentClient(const std::string& torrentFile,
                                  const std::string& downloadLocation)
@@ -54,7 +54,10 @@ namespace torrent {
         }
         else {
             size_t size = m_torrent.getPieceLength();
+// REVIEW: Not legal in C++ make this either a vector<char> 
+// or dynamic array
             char buffer[size];
+// REVIEW: You do not seem to mutate this object, make this a const reference
             for (ChunkInfo chunkInfo : m_torrent.getChunks()) {
                 //try {
                     in.read(buffer, size);
@@ -67,6 +70,7 @@ namespace torrent {
                     // Check the checksum of this part of the file.
                     // If the checksum matches, we have already downloaded
                     // this chunk: upload instead of downloading it.
+// REVIEW: C-style casts are the devil, static_cast instead
                     if (chunkInfo.getChunkHash() == SHA1Hash((unsigned char *)(buffer), amount_read)) {
                         m_uploadList.push_back(
                             Chunk(chunkInfo,
@@ -109,6 +113,7 @@ namespace torrent {
         if ((errVal = m_leecher.stopDownload(m_downloadList)) != 0)
             return errVal;
         list<ChunkInfo> uploadMetadata;
+// REVIEW: Make this a Chunk& or use std::move to prevent copy and destruction
         for (Chunk c : m_uploadList) {
             uploadMetadata.push_back(c.getMetadata());
         }
@@ -126,10 +131,12 @@ namespace torrent {
         //TODO: intellegent behavior based on the error.
         
         // Attempt to download the chunk again.
+// REVIEW: Since this is so common, we should add API support for single chunk
         m_leecher.download(list<ChunkInfo>(1, chunkMetadata));
     }
     void TorrentClient::chunkDownloadSuccess(const Chunk& chunk)
     {
+// REVIEW: you do not seem to modify the metaInfo, so why is this not a const&?
         ChunkInfo metadata = chunk.getMetadata();
         //Remove this chunk from our download list.
         // TODO: is this step necessary? O(n), could be chagned to O(log(n))
@@ -149,6 +156,14 @@ namespace torrent {
         // Now add the chunk to our upload list, upload it.
         // TODO: this breaks the order of the list.  Do we care?
         m_uploadList.push_back(chunk);
+// REVIEW: HERE TOO
         m_seeder.upload(list<Chunk>(1, chunk));
     }
 }
+
+
+
+// REVIEW
+// As a side note your lack of curly braces makes me sad, but that is purely
+// style and thus does not matter since you are more than capable of knowing 
+// when you need them.
