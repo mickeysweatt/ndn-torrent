@@ -11,50 +11,85 @@
 #include <memory>
 #include <string>
 
-#include <iostream>
-
 namespace torrent {
 
 int Seeder::upload(const std::list<Chunk>& chunkDataList)
 {
+	 int retErrorCode = NO_ERROR;
+	 int errorCode;
 	 for (auto iter = chunkDataList.begin(); iter != chunkDataList.end(); iter++)
 	 {
-			size_t id = iter->getMetadata().getChunkId();
-			ndn::Name chunkName(m_prefix + std::to_string(id));
-			std::unique_ptr<ndn::Producer> chunkProducer(new ndn::Producer(chunkName));
-			chunkProducer->setContextOption(INTEREST_ENTER_CNTX,
-																			(ndn::ConstInterestCallback)std::bind(&Seeder::onInterest, this, _1));
-			chunkProducer->setContextOption(CACHE_MISS,
-																			(ndn::ConstInterestCallback)std::bind(&Seeder::onCacheMiss, this, _1));
-			chunkProducer->attach();
-
-			m_producers.insert(std::make_pair(id, std::move(chunkProducer)));
-			m_chunks.insert(std::make_pair(id, *iter));
+			if ((errorCode = upload(*iter)) != NO_ERROR)
+				 retErrorCode = errorCode;
 	 }
-	 return 0;
+	 return retErrorCode;
+}
+
+int Seeder::upload(const Chunk& chunk)
+{
+	 size_t id = chunk.getMetadata().getChunkId();
+	 ndn::Name chunkName(m_prefix + std::to_string(id));
+	 std::unique_ptr<ndn::Producer> chunkProducer(new ndn::Producer(chunkName));
+	 chunkProducer->setContextOption(INTEREST_ENTER_CNTX,
+																	 (ndn::ConstInterestCallback)std::bind(&Seeder::onInterest, this, _1));
+	 chunkProducer->setContextOption(CACHE_MISS,
+																	 (ndn::ConstInterestCallback)std::bind(&Seeder::onCacheMiss, this, _1));
+	 chunkProducer->attach();
+
+	 m_producers.insert(std::make_pair(id, std::move(chunkProducer)));
+	 m_chunks.insert(std::make_pair(id, chunk));
+
+	 return NO_ERROR;
 }
 
 int Seeder::stopUploading(const std::list<ChunkInfo>& chunkInfoList)
 {
-	 int retVal = 0;
+	 int retErrorCode = NO_ERROR;
+	 int errorCode;
 	 for (auto iter = chunkInfoList.begin(); iter != chunkInfoList.end(); iter++)
 	 {
-			size_t id = iter->getChunkId();
-			if (!m_producers.count(id))
-			{
-				 retVal = 1; // Chunk ID not found
-				 continue;
-			}
-
-			/// TODO: Doesn't seem like CP API actually detaches producer from network
-			m_producers.erase(id);
-			m_chunks.erase(id);
+			if ((errorCode = stopUploading(*iter)) != NO_ERROR)
+				 retErrorCode = errorCode;
 	 }
-	 return retVal;
+	 return retErrorCode;
+}
+
+int Seeder::stopUploading(const std::list<Chunk>& chunkList)
+{
+	 int retErrorCode = NO_ERROR;
+	 int errorCode;
+	 for (auto iter = chunkList.begin(); iter != chunkList.end(); iter++)
+	 {
+			if ((errorCode = stopUploading(*iter)) != NO_ERROR)
+				 retErrorCode = errorCode;
+	 }
+	 return retErrorCode;
+}
+
+int Seeder::stopUploading(const ChunkInfo& chunkInfo)
+{
+	 size_t id = chunkInfo.getChunkId();
+	 if (!m_producers.count(id))
+			return CHUNK_NOT_FOUND;
+
+	 /// TODO: Doesn't seem like CP API actually detaches producer from network,
+	 /// may need a workaround if we want better performance
+	 m_producers.erase(id);
+	 m_chunks.erase(id);
+
+	 return NO_ERROR;
+}
+
+int Seeder::stopUploading(const Chunk& chunk)
+{
+	 return stopUploading(chunk.getMetadata());
 }
 
 void Seeder::onInterest(const ndn::Interest& interest)
 {
+	 // onCacheMiss seems to need this function to work properly, even if it does
+	 // nothing
+	 return;
 }
 
 void Seeder::onCacheMiss(const ndn::Interest& interest)
@@ -65,10 +100,7 @@ void Seeder::onCacheMiss(const ndn::Interest& interest)
 
 	 // Drop interest if we don't have a suitable producer
 	 if (!m_chunks.count(id))
-	 {
-			std::cout << "Producer not found" << std::endl;
 			return;
-	 }
 			
 	 const std::vector<char>& buffer = m_chunks[id].getBuffer();
 	 std::unique_ptr<ndn::Producer>& producer = m_producers[id];

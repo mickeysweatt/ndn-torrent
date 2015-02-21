@@ -11,9 +11,6 @@
 #include <string>
 #include <unordered_map>
 
-/// TODO: Probably move this to a global header.
-const char TORRENT_NAMESPACE[] = "/torrent";
-
 namespace torrent {
 
 class ChunkInfo;
@@ -24,7 +21,7 @@ class Seeder {
 public:
    // CREATORS
 	 explicit Seeder(TorrentClientProtocol& clientProtocol);
-	 // Create a Seeder that communicates with clientProtocol.
+	 // DEPRECATED, use two-arg constructor instead
 
    Seeder(TorrentClientProtocol& clientProtocol,
 					const std::string& prefix);
@@ -35,13 +32,34 @@ public:
    // Destroy this object.
 
    int upload(const std::list<Chunk>& chunkDataList);
+	 // PRECONDITION: Chunks agree with metadata hash
    // Announce to the network to forward interest packets for chunks in
    // chunkDataList to this client.
+
+	 int upload(const Chunk& chunk);
+	 // PRECONDITION: Chunks agree with metadata hash
+	 // Announce to the network to forward interest packets for this chunk to this
+	 // client.
 
    int stopUploading(const std::list<ChunkInfo>& chunkInfoList);
    // Announce to the network that this client no longer serves interest packets
    // for chunks in chunkDataList.
 
+	 int stopUploading(const std::list<Chunk>& chunkList);
+	 // Announce to the network that this client no longer serves interest packets
+	 // for chunks in chunkList.
+
+	 int stopUploading(const ChunkInfo& chunkInfo);
+	 // Announce to the network that this client no longer serves interest packets
+	 // for this chunk.
+
+	 int stopUploading(const Chunk& chunk);
+	 // Announce to the network that this client no longer serves interest packets
+	 // for this chunk.
+
+	 // ERROR CODES
+	 static const int NO_ERROR = 0;
+	 static const int CHUNK_NOT_FOUND = 1;
 private:
    // DATA
    TorrentClientProtocol& m_clientProtocol;
@@ -58,8 +76,7 @@ private:
 //                       INLINE FUNCTION DEFINTIONS
 //==============================================================================
 
-/// TODO: Ideally this function shouldn't exist, but need to consult with group
-/// on changing the interface.
+// DEPRECATED, use two-arg constructor instead
 inline Seeder::Seeder(TorrentClientProtocol& clientProtocol)
 	 : m_clientProtocol(clientProtocol)
 {
