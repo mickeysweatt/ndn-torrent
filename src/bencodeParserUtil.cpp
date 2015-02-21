@@ -2,6 +2,7 @@
 #include <bencodeParserUtil.hpp>
 #include <string>
 #include <istream>
+#include <cassert>
 
 using std::list;
 using std::string;
@@ -45,20 +46,11 @@ namespace torrent {
     {
         string int_buff;
         char c;
-        if ('i' != in.peek()) {
-            throw new BencodeParserUtil::ParseError("Attempting to construct "
-                                                    "integer token from "
-                                                    "non-integer ");
-        }
+        assert('i' == in.peek());
         // consume the i
         in.get();
         while('e' != (c = in.get())) {
-            if (!isdigit(c)) {
-                throw new BencodeParserUtil::ParseError("Attempting to "
-                                                        "construct integer "
-                                                        "token from "
-                                                        "non-integer");
-            }
+            assert(isdigit(c));
             int_buff += c;
         }
         m_value = atoi(int_buff.c_str());
@@ -71,19 +63,10 @@ namespace torrent {
         string length_str;
         int length;
         char c;
-        //char *buffer;
         
-        if (!isdigit(in.peek())) {
-            throw BencodeParserUtil::ParseError("Attemptying to construct a "
-                                                "byte string from an illformed "
-                                                "string");
-        }
+        assert(isdigit(in.peek()));
         while(':' != (c = in.get())) {
-            if (!isdigit(c)) {
-                throw new BencodeParserUtil::ParseError(
-                                              "Attempting to construct integer "
-                                              "token from illformed string");
-            }
+            assert(isdigit(c));
             length_str += c;
         }
         length = atoi(length_str.c_str());
@@ -97,11 +80,9 @@ namespace torrent {
     BencodeList::BencodeList(std::istream& in)
     {
         BencodeToken* curr_tok;
-        if ('l' != in.peek())
-        {
-            throw new BencodeParserUtil::ParseError("invalid list");
-        }
-        in.get();
+        assert('l' == in.peek());
+        // consume the l
+        in.get(); 
         while ('e' != in.peek()) {
             curr_tok = &BencodeParserUtil::parseStream(in);
             m_tokens.push_back(curr_tok);
@@ -125,15 +106,14 @@ namespace torrent {
         if ('d' != in.peek()) {
             throw new BencodeParserUtil::ParseError("Bad dict");
         }
+        // consume the 'd'
         in.get();
         while ('e' != in.peek()) {
             key = dynamic_cast<BencodeByteStringToken *>(
                                            &BencodeParserUtil::parseStream(in));
-            if (nullptr == key) {
-                throw new BencodeParserUtil::ParseError("Bad key");
-            }
+            assert(nullptr != key);
             value = &BencodeParserUtil::parseStream(in);
-            m_dict[*key] = value;
+            m_dict[std::move(*key)] = value;
         }
         in.get();
     }

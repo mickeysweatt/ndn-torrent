@@ -8,6 +8,8 @@
 #include <set>
 #include <iostream>
 
+#include <cassert>
+
 using std::string;
 using std::list;
 using std::set;
@@ -55,18 +57,21 @@ namespace torrent {
                               int&               pieceLength,
                               std::vector<char>& pieces)
     {
-        auto pieceLengthToken = 
+        auto pieceLengthTokenPtr = 
                 dynamic_cast<const BencodeIntegerToken    *>(
                                          infoDict.find("piece length")->second);
-        auto nameToken        = 
+        auto nameTokenPtr       = 
                 dynamic_cast<const BencodeByteStringToken *>(
                                          infoDict.find("name")->second);
-        auto piecesToken      = 
+        auto piecesTokenPtr      = 
                 dynamic_cast<const BencodeByteStringToken *>(
                                           infoDict.find("pieces")->second);
-        name        = nameToken->getString();
-        pieceLength = pieceLengthToken->getValue();
-        pieces      = piecesToken->getValue();
+        assert(nullptr != pieceLengthTokenPtr &&     
+               nullptr != nameTokenPtr        && 
+               nullptr != piecesTokenPtr);
+        name        = nameTokenPtr->getString();
+        pieceLength = pieceLengthTokenPtr->getValue();
+        pieces      = piecesTokenPtr->getValue();
     }
     
     static void getInfoMultiFileTorrent(const BencodeDict&        infoDict,
@@ -77,20 +82,24 @@ namespace torrent {
     {
         auto fileListToken  = dynamic_cast<const BencodeList *>(
                                                 infoDict.find("files")->second);
-        for (auto file : fileListToken->getTokens()) {
-            auto fileDict = dynamic_cast<const BencodeDict&>(*file);
+        // each file here is a dict with meta-info about file
+        for (auto fileMetaInfo : fileListToken->getTokens()) {
+            auto fileDict = dynamic_cast<const BencodeDict&>(*fileMetaInfo);
             std::string pathString = "";
             auto path = dynamic_cast<const BencodeList *>(
                                                  fileDict.find("path")->second);
             auto pathCompnents = path->getTokens();
+            // stringify the path name (path is a list of path components)
             for (auto pathComponent : *path) {
                 pathString += dynamic_cast<const BencodeByteStringToken *>(
                                                   pathComponent)->getString() +
                             (pathComponent == pathCompnents.back() ? "" : "/" );
             }
-            auto length = dynamic_cast<const BencodeIntegerToken *>(
-                                   fileDict.find("length")->second)->getValue();
-            files.insert(std::pair<string, size_t>(pathString, length));
+            auto lengthToken = dynamic_cast<const BencodeIntegerToken *>(
+                                   fileDict.find("length")->second);
+            assert (nullptr != lengthToken);
+            files.insert(std::pair<string, size_t>(pathString, 
+                                                   lengthToken->getValue()));
         }
         getInfoCommon(infoDict, name, pieceLength, pieces);
     }
@@ -104,6 +113,7 @@ namespace torrent {
         getInfoCommon(infoDict, name, pieceLength, pieces);
         auto fileLengthToken  = dynamic_cast<const BencodeIntegerToken *>(
                                                infoDict.find("length")->second);
+        assert(nullptr != fileLengthToken);
         pieceLength = fileLengthToken->getValue();
     }
 
@@ -112,26 +122,23 @@ namespace torrent {
         std::set<string> announcelist;
         list<BencodeToken *> tempList1, tempList2;
         BencodeList *curr_list;
-        
-        if (nullptr == announceListToken) {
-            throw TorrentParserUtil::ParseError("announce-list illformatted");
-        }
+
+        assert(nullptr != announceListToken);
+
         tempList1 = announceListToken->getTokens();
-        //unpack announce-list
+        // unpack announce-list
         for (auto it : tempList1) {
             curr_list = dynamic_cast<BencodeList *>(it);
-            if (nullptr == curr_list) {
-                throw TorrentParserUtil::ParseError(
-                                                  "announce-list illformatted");
-            }
+            assert(nullptr != curr_list);
             for (auto it2 : curr_list->getTokens()) {
                 tempList2.push_back((it2));
             }
         }
         // grab strings from unpacked list
         for (auto it : tempList2) {
-            announcelist.insert(
-                dynamic_cast<BencodeByteStringToken *>(it)->getString());
+            auto announceURLToken = dynamic_cast<BencodeByteStringToken *>(it);
+            assert(nullptr != announceURLToken);
+            announcelist.insert(announceURLToken->getString());
         }
         return std::move(announcelist);
     }
@@ -159,14 +166,13 @@ namespace torrent {
             throw new ParseError("Bad stream");
         }
         ast = dynamic_cast<BencodeDict *>(&BencodeParserUtil::parseStream(in));
-        if (nullptr == ast) {
-            throw new ParseError("Illformed torrent file");
-        }
+        assert(nullptr != ast);
         torrentDict = ast->getValues();
         announceToken = dynamic_cast<BencodeByteStringToken *>(
                                                        torrentDict["announce"]);
         announceList = getAnnounceList(dynamic_cast<BencodeList *>(
                                                  torrentDict["announce-list"]));
+        // torrents are weird, and have an "announce" and "announce-list"
         announceList.insert(announceToken->getString());
         if (isMultieFileTorrent(dynamic_cast<BencodeDict&>(
                                                        *torrentDict["info"]))) 

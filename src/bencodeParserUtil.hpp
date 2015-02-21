@@ -19,7 +19,7 @@
 // BencodeList', and 'BencodeDict'.  For more information about bencode see the
 // following description:
 //..
-// <https://en.wikipedia.org/wiki/Bencode>
+//  <https://en.wikipedia.org/wiki/Bencode>
 //..
 
 #include <string>
@@ -68,15 +68,19 @@ class BencodeToken {
   public:
     // CREATORS
     BencodeToken() = default;
-        // No one should construct a 'BencodeToken' instance.
+        // Create an empty 'BencodeToken'.
 
     virtual ~BencodeToken() = default;
-        // Delete this object.
+        // Destroy this object.
 
-    BencodeToken(const BencodeToken& other) = default;
+    BencodeToken(const BencodeToken& original) = default;
+        // Create a 'BencodeToken' object having the value of the specified 
+        // 'original' token.
 
     // MANIPULATORS
     BencodeToken& operator=(const BencodeToken& rhs) = default;
+        // Assign to this object the value of the specified 'rhs' token, and
+        // return a reference providing modifiable access to this object.
 };
 
 class BencodeIntegerToken : public BencodeToken {
@@ -88,12 +92,14 @@ class BencodeIntegerToken : public BencodeToken {
   public:
     // CREATORS
     BencodeIntegerToken() = default;
-        // Create an empty object.
+        // Create an empty 'BencodeIntegerToken'.
 
     virtual ~BencodeIntegerToken() = default;
         // Destroy this object.
 
-    BencodeIntegerToken(const BencodeIntegerToken& other) = default;
+    BencodeIntegerToken(const BencodeIntegerToken& original) = default;
+        // Create a 'BencodeIntegerToken' object having the value of the 
+        // specified 'original' token.
 
     explicit BencodeIntegerToken(std::istream& in);
         // Create a 'BencodeIntegerToken' from the first token in the specified
@@ -106,6 +112,8 @@ class BencodeIntegerToken : public BencodeToken {
 
     // MANIPULATORS
     BencodeIntegerToken& operator=(const BencodeIntegerToken& rhs) = default;
+        // Assign to this object the value of the specified 'rhs' token, and
+        // return a reference providing modifiable access to this object.
 };
 
 class BencodeByteStringToken : public BencodeToken {
@@ -129,7 +137,9 @@ class BencodeByteStringToken : public BencodeToken {
     virtual ~BencodeByteStringToken() = default;
         // Destroy this object.
 
-    BencodeByteStringToken(const BencodeByteStringToken& other) = default;
+    BencodeByteStringToken(const BencodeByteStringToken& original) = default;
+        // Create a 'BencodeByteStringToken' object having the value of the 
+        // specified 'original' token.
 
     explicit BencodeByteStringToken(const char *buffer, size_t length);
         // Create a object with value of the first specified 'length' bytes of
@@ -143,7 +153,8 @@ class BencodeByteStringToken : public BencodeToken {
 
     explicit
     BencodeByteStringToken(std::string& str);
-        // Create an object with the value of the specified 'str' string.
+        // Create an 'BencodeByteStringToken' with the value of the specified 
+        // 'str' string.
 
     explicit
     BencodeByteStringToken(std::istream& in);
@@ -162,6 +173,8 @@ class BencodeByteStringToken : public BencodeToken {
     // MANIPULATORS
     BencodeByteStringToken&
     operator=(const BencodeByteStringToken& rhs) = default;
+        // Assign to this object the value of the specified 'rhs' token, and
+        // return a reference providing modifiable access to this object.
 };
 
 class BencodeList : public BencodeToken {
@@ -181,7 +194,9 @@ class BencodeList : public BencodeToken {
     virtual ~BencodeList() = default;
         // Destory this object.
 
-    BencodeList(const BencodeList& other) = default;
+    BencodeList(const BencodeList& original) = default;
+        // Create a 'BencodeList' object having the value of the specified 
+        // 'original' token.
 
     explicit
     BencodeList(std::istream& in);
@@ -210,6 +225,8 @@ class BencodeList : public BencodeToken {
 
     // MANIPULATORS
     BencodeList& operator=(const BencodeList& rhs) = default;
+        // Assign to this object the value of the specified 'rhs' token, and
+        // return a reference providing modifiable access to this object.
 };
 
 class BencodeDict : public BencodeToken {
@@ -234,11 +251,14 @@ class BencodeDict : public BencodeToken {
 
     // PRIVATE MANIPULATORS
     BencodeToken& operator[](const BencodeByteStringToken& key);
+        // Return a modifiable reference to the value in this dictionary 
+        // for the specified 'key', and create a new entry if none exists.
 
   public:
 
     // PUBLIC CLASS MEMBERS
     static BencodeDictComparator keyComparator;
+        // The comparator used by all instances of 'BencodeDict' for ordering.
 
     // CREATORS
     BencodeDict() = default;
@@ -285,6 +305,8 @@ class BencodeDict : public BencodeToken {
 
     // MANIPULATORS
     BencodeDict& operator=(const BencodeDict& rhs) = default;
+        // Assign to this object the value of the specified 'rhs' token, and
+        // return a reference providing modifiable access to this object.
 };
 
 //==============================================================================
