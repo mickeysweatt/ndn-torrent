@@ -2,6 +2,7 @@
 #define INCLUDED_CHUNK_HPP
 
 #include <chunkInfo.hpp>
+#include <memory>
 #include <vector>
 
 namespace torrent {
@@ -39,9 +40,9 @@ private:
 	 // DATA
 	 ChunkInfo m_metadata;
 
-	 std::vector<char> m_buffer;
-	 /// TODO: Use a less naive implementation of storing the buffer by avoiding
-	 /// copying the buffer
+	 std::shared_ptr<std::vector<char>> m_buffer;
+	 /// TODO: For large files, we don't want to keep all buffers in memory.
+	 /// Discuss with team, but it might be wise to implement a cache.
 };
 
 //==============================================================================
@@ -53,7 +54,7 @@ inline Chunk::Chunk()
 }
 
 inline Chunk::Chunk(const ChunkInfo& metadata, const std::vector<char>& buffer)
-	 : m_metadata(metadata), m_buffer(buffer)
+	 : m_metadata(metadata), m_buffer(new std::vector<char>(buffer))
 {
 }
 
@@ -68,19 +69,19 @@ inline const ChunkInfo& Chunk::getMetadata() const
 
 inline const std::vector<char>& Chunk::getBuffer() const
 {
-	 return m_buffer;
+	 return *m_buffer;
 }
 
 inline int Chunk::setMetadata(const ChunkInfo& metadata)
 {
 	 m_metadata = metadata;
-     return -1;
+	 return -1;
 }
 
 inline int Chunk::setBuffer(const std::vector<char>& buffer)
 {
-	 m_buffer = buffer;
-     return -1;
+	 m_buffer = std::shared_ptr<std::vector<char>>(new std::vector<char>(buffer));
+	 return -1;
 }
 
 } // namespace torrent
