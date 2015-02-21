@@ -17,7 +17,8 @@ public:
 // REVIEW: Switch these to '=default'
 	 Chunk();
 	 // Creates an empty chunk.
-
+// REVIEW: Add a move ctor here, ask me if you have any questions about this
+//   Chunk(ChunkInfo&& metadata, std::vector<char>&& buffer);
 	 Chunk(const ChunkInfo& metadata, const std::vector<char>& buffer);
 	 // Creates a chunk and initializes the metadata and data.
 
@@ -97,4 +98,5 @@ inline int Chunk::setBuffer(const std::vector<char>& buffer)
 // REVIEW: Return codes should either be removed or made useful and explained, 
 // and the default ctor and destructor should be just declared as the default 
 // (my bad on the bad example) for the sake of alloiwng zero initialization and
-// not depricating the default ctor (which you should also declare)
+// not depricating the default ctor and assignment operator
+// (which you should also declare) 
