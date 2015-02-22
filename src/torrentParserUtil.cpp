@@ -21,6 +21,7 @@ using std::map;
 //                    STATIC HELPER FUNCTION DECLARATIONS
 //==============================================================================
 namespace torrent {
+// REVIEW: possible typo, should it be isMultiFileTorrent?
     static bool isMultieFileTorrent(const BencodeDict& infoDict);
     
     static void getInfoCommon(const BencodeDict& infoDict,
@@ -47,6 +48,7 @@ namespace torrent {
 //                    STATIC HELPER FUNCTIONS DEFINITIONS
 //==============================================================================
 namespace torrent {
+// REVIEW: typo, see earlier comment
     static bool isMultieFileTorrent(const BencodeDict& infoDict) 
     {
        return infoDict.end() == infoDict.find("length");
@@ -121,6 +123,7 @@ namespace torrent {
     {
         std::set<string> announcelist;
         list<BencodeToken *> tempList1, tempList2;
+// REVIEW: not camelcase?
         BencodeList *curr_list;
 
         assert(nullptr != announceListToken);
@@ -131,9 +134,12 @@ namespace torrent {
             curr_list = dynamic_cast<BencodeList *>(it);
             assert(nullptr != curr_list);
             for (auto it2 : curr_list->getTokens()) {
+// REVIEW: extra parentheses?
                 tempList2.push_back((it2));
             }
         }
+// REVIEW: tempList2 seems unnecessary if we insert into announcelist in the
+// previous for loop
         // grab strings from unpacked list
         for (auto it : tempList2) {
             auto announceURLToken = dynamic_cast<BencodeByteStringToken *>(it);
@@ -155,6 +161,7 @@ namespace torrent {
         BencodeByteStringToken *announceToken;
         set<string> announceList;
         set<pair<string, size_t>> files;
+// REVIEW: no camelcase?
         int piece_length, fileLength;
         string name;
         vector<char> pieces;
