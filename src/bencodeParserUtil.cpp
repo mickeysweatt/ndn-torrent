@@ -36,6 +36,8 @@ namespace torrent {
                 }
             }
         }
+// REVIEW: seems a little odd to return a reference variable to allocated memory
+// that if the callee is responsible for deleting it
         return *curr_tok_p;
     }
 
@@ -79,12 +81,15 @@ namespace torrent {
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
     BencodeList::BencodeList(std::istream& in)
     {
+// REVIEW: consistency in pointer declaration; elsewhere you put the * next to
+// the variable name
         BencodeToken* curr_tok;
         assert('l' == in.peek());
         // consume the l
         in.get(); 
         while ('e' != in.peek()) {
             curr_tok = &BencodeParserUtil::parseStream(in);
+// REVIEW: possible memory leak; do the tokens ever get deleted?
             m_tokens.push_back(curr_tok);
         }
         in.get();
@@ -113,6 +118,7 @@ namespace torrent {
                                            &BencodeParserUtil::parseStream(in));
             assert(nullptr != key);
             value = &BencodeParserUtil::parseStream(in);
+// REVIEW: possibly memory leak; are the tokens ever deleted?
             m_dict[std::move(*key)] = value;
         }
         in.get();

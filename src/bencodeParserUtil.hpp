@@ -53,7 +53,7 @@ class BencodeParserUtil {
         // No instances of this class should be built.
 
     static BencodeToken& parseStream(std::istream& in);
-        // Parse the data in the specified 'in' strean and return a reference
+        // Parse the data in the specified 'in' stream and return a reference
         // to the first token. In the case of illformed data a 'ParseError' is
         // thrown.  Note that only the first token is parsed, and 'in' may
         // contain more than more token.
