@@ -18,58 +18,67 @@ class ChunkInfo;
 class Seeder {
    // A class that repesents the seeding, i.e. uploading, portion of the client.
    // It will respond to interest packets for chunks that it can upload.
-public:
+  public:
    // CREATORS
-	 explicit Seeder(TorrentClientProtocol& clientProtocol);
-	 // DEPRECATED, use two-arg constructor instead
+    explicit Seeder(TorrentClientProtocol& clientProtocol);
+     // DEPRECATED, use two-arg constructor instead
 
-   Seeder(TorrentClientProtocol& clientProtocol,
-					const std::string& prefix);
-   // Create a Seeder that communicates with clientProtocol, and seeds using the
-	 // given prefix.
+    Seeder(TorrentClientProtocol& clientProtocol,
+           const std::string&     prefix);
+    // Create a Seeder that communicates with clientProtocol, and seeds using the
+    // given prefix.
+// REVIEW: Make me default
+    ~Seeder();
+    // Destroy this object.
 
-   ~Seeder();
-   // Destroy this object.
+// REVIEW: Should this class be non-copyable? We can discuss this.
 
-   int upload(const std::list<Chunk>& chunkDataList);
-	 // PRECONDITION: Chunks agree with metadata hash
-   // Announce to the network to forward interest packets for chunks in
-   // chunkDataList to this client.
+// REVIEW: Add move version of each of these (good for performance and for
+// potential threading later)
+    int upload(const std::list<Chunk>& chunkDataList);
+    // PRECONDITION: Chunks agree with metadata hash
+    // Announce to the network to forward interest packets for chunks in
+    // chunkDataList to this client.
 
-	 int upload(const Chunk& chunk);
-	 // PRECONDITION: Chunks agree with metadata hash
-	 // Announce to the network to forward interest packets for this chunk to this
-	 // client.
+    int upload(const Chunk& chunk);
+    // PRECONDITION: Chunks agree with metadata hash
+    // Announce to the network to forward interest packets for this chunk to this
+    // client.
 
-   int stopUploading(const std::list<ChunkInfo>& chunkInfoList);
-   // Announce to the network that this client no longer serves interest packets
-   // for chunks in chunkDataList.
+    int stopUploading(const std::list<ChunkInfo>& chunkInfoList);
+    // Announce to the network that this client no longer serves interest packets
+    // for chunks in chunkDataList.
 
-	 int stopUploading(const std::list<Chunk>& chunkList);
-	 // Announce to the network that this client no longer serves interest packets
-	 // for chunks in chunkList.
+    int stopUploading(const std::list<Chunk>& chunkList);
+    // Announce to the network that this client no longer serves interest packets
+    // for chunks in chunkList.
 
-	 int stopUploading(const ChunkInfo& chunkInfo);
-	 // Announce to the network that this client no longer serves interest packets
-	 // for this chunk.
+    int stopUploading(const ChunkInfo& chunkInfo);
+    // Announce to the network that this client no longer serves interest packets
+    // for this chunk.
 
-	 int stopUploading(const Chunk& chunk);
-	 // Announce to the network that this client no longer serves interest packets
-	 // for this chunk.
+    int stopUploading(const Chunk& chunk);
+    // Announce to the network that this client no longer serves interest packets
+    // for this chunk.
 
-	 // ERROR CODES
-	 static const int NO_ERROR = 0;
-	 static const int CHUNK_NOT_FOUND = 1;
+// REVIEW: Make these an enum (they take no space, and again are better for 
+// concurrency)
+
+    // ERROR CODES
+    static const int NO_ERROR = 0;
+    static const int CHUNK_NOT_FOUND = 1;
 private:
-   // DATA
-   TorrentClientProtocol& m_clientProtocol;
-	 std::unordered_map<size_t, std::unique_ptr<ndn::Producer>> m_producers;
-	 std::unordered_map<size_t, Chunk> m_chunks;
-	 std::string m_prefix;
+    // DATA
+    TorrentClientProtocol& m_clientProtocol;
+// REVIEW: Is unique pointer really want you want? If so, this class is for
+// sure non-copyable. 
+    std::unordered_map<size_t, std::unique_ptr<ndn::Producer>> m_producers;
+    std::unordered_map<size_t, Chunk> m_chunks;
+    std::string m_prefix;
 
-	 // PRIVATE FUNCTIONS
-	 void onInterest(const ndn::Interest& interest);
-	 void onCacheMiss(const ndn::Interest& interest);
+     // PRIVATE FUNCTIONS
+     void onInterest(const ndn::Interest& interest);
+     void onCacheMiss(const ndn::Interest& interest);
 };
 
 //==============================================================================
@@ -78,16 +87,18 @@ private:
 
 // DEPRECATED, use two-arg constructor instead
 inline Seeder::Seeder(TorrentClientProtocol& clientProtocol)
-	 : m_clientProtocol(clientProtocol)
+     : m_clientProtocol(clientProtocol)
 {
-	 m_prefix = "/torrent/file/";
+     m_prefix = "/torrent/file/";
 }
 
 inline Seeder::Seeder(TorrentClientProtocol& clientProtocol,
-											const std::string& prefix)
-	 : m_clientProtocol(clientProtocol), m_prefix(prefix)
+                      const std::string&     prefix)
+     : m_clientProtocol(clientProtocol), m_prefix(prefix)
 {
-	 /// TODO: Parse prefix to ensure it's a valid prefix?
+// REVIEW: Nah, make it a precondition, and let that be that.
+     /// TODO: Parse prefix to ensure it's a valid prefix?
+
 }
 
 inline Seeder::~Seeder()
