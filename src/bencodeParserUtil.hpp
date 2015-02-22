@@ -29,6 +29,7 @@
 #include <iosfwd>
 #include <exception>
 #include <functional>
+#include <memory>
 
 namespace torrent {
 
@@ -52,7 +53,7 @@ class BencodeParserUtil {
     BencodeParserUtil() = delete;
         // No instances of this class should be built.
 
-    static BencodeToken& parseStream(std::istream& in);
+    static std::shared_ptr<BencodeToken> parseStream(std::istream& in);
         // Parse the data in the specified 'in' stream and return a reference
         // to the first token. In the case of illformed data a 'ParseError' is
         // thrown.  Note that only the first token is parsed, and 'in' may
@@ -181,11 +182,12 @@ class BencodeList : public BencodeToken {
     // A value-semantic type for Bencode list tokens.
 
     // DATA
-    std::list<BencodeToken *> m_tokens;
+    std::list<std::shared_ptr<BencodeToken> > m_tokens;
 
   public:
     // PUBLIC TYPES
-    typedef std::list<BencodeToken *>::const_iterator const_iterator;
+    typedef std::list<std::shared_ptr<BencodeToken> >::const_iterator 
+                                                                 const_iterator;
 
     // CREATORS
     BencodeList() = default;
@@ -205,11 +207,15 @@ class BencodeList : public BencodeToken {
         // in begins with a valid Benocde list.
 
     explicit
-    BencodeList(const std::list<BencodeToken*>& toks);
+    BencodeList(const std::list<std::shared_ptr<BencodeToken> >& toks);
+        // Construct a object with the value of the specified 'toks' list.
+
+    explicit
+    BencodeList(std::list<std::shared_ptr<BencodeToken> >&& toks);
         // Construct a object with the value of the specified 'toks' list.
 
     // ACCESSORS
-    const std::list<BencodeToken *>& getTokens() const;
+    const std::list<std::shared_ptr<BencodeToken> >& getTokens() const;
         // Return an unmodifiable reference to a list containing all the tokens
         // in this object.
 
@@ -239,14 +245,14 @@ class BencodeDict : public BencodeToken {
     BencodeDictComparator;
 
     typedef std::map<BencodeByteStringToken,
-                     BencodeToken*,
+                     std::shared_ptr<BencodeToken>,
                      BencodeDictComparator>::const_iterator
     const_iterator;
 
   private:
     // DATA
     std::map<BencodeByteStringToken,
-             BencodeToken*,
+             std::shared_ptr<BencodeToken>,
              BencodeDictComparator> m_dict;
 
     // PRIVATE MANIPULATORS
@@ -278,8 +284,8 @@ class BencodeDict : public BencodeToken {
 
     explicit
     BencodeDict(const std::map<BencodeByteStringToken,
-                                BencodeToken *,
-                                BencodeDictComparator>& dict);
+                               std::shared_ptr<BencodeToken>,
+                               BencodeDictComparator>& dict);
         // Create a dictionary with the value of the specified 'dict'.
 
     // ACCESSORS
@@ -289,7 +295,7 @@ class BencodeDict : public BencodeToken {
         // in dictionary.
 
     const std::map<BencodeByteStringToken,
-                   BencodeToken*,
+                   std::shared_ptr<BencodeToken>,
                    BencodeDictComparator>& getValues() const;
         // Return a map with the contents of this dictionary.
 
@@ -369,13 +375,19 @@ std::string BencodeByteStringToken::getString() const
 //                            BencodeList
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 inline
-BencodeList::BencodeList(const std::list<BencodeToken*>& toks)
+BencodeList::BencodeList(const std::list<std::shared_ptr<BencodeToken> >& toks)
 : m_tokens(toks)
 {
 }
 
 inline
-const std::list<BencodeToken*>& BencodeList::getTokens() const
+BencodeList::BencodeList(std::list<std::shared_ptr<BencodeToken> >&& toks)
+: m_tokens(toks)
+{
+}
+
+inline
+const std::list< std::shared_ptr<BencodeToken> >& BencodeList::getTokens() const
 {
     return m_tokens;
 }
@@ -397,7 +409,7 @@ BencodeList::const_iterator BencodeList::end() const
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 inline
 BencodeDict::BencodeDict(const std::map<BencodeByteStringToken,
-                                        BencodeToken*,
+                                        std::shared_ptr<BencodeToken>,
                                         BencodeDictComparator>& dict)
 : m_dict(dict)
 {
