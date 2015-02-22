@@ -387,7 +387,7 @@ BencodeList::BencodeList(std::list<std::shared_ptr<BencodeToken> >&& toks)
 }
 
 inline
-const std::list< std::shared_ptr<BencodeToken> >& BencodeList::getTokens() const
+const std::list<std::shared_ptr<BencodeToken> >& BencodeList::getTokens() const
 {
     return m_tokens;
 }
