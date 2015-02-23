@@ -49,6 +49,13 @@ namespace torrent {
     {
         return m_chunks;
     }
+    
+    // TODO: if the vector sticks around, change to const vector<...>&
+    std::vector<Torrent::FileTuple> Torrent::getFileTuples() const
+    {
+        //TODO: a real implementation.
+        return std::vector<Torrent::FileTuple>();
+    }
 
     Torrent& Torrent::operator=(Torrent&& rhs)
     {

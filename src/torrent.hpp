@@ -56,6 +56,10 @@ class Torrent {
     const std::list<ChunkInfo>& getChunks() const;
     // Return a list of all the chunks in this torrent.
     
+    // TODO: if the vector sticks around, change to const vector<...>&
+    std::vector<FileTuple> getFileTuples() const;
+    // Return a vector of File names and their lengths.
+    
     // MANIPULATORS
     Torrent& operator=(Torrent&& rhs);
         // Assign the value of the specified 'rhs' object to this value.

@@ -18,7 +18,8 @@ class TorrentClient : public TorrentClientProtocol {
     //CREATORS
     TorrentClient(const std::string& torrentFile,
             const std::string& downloadLocation);
-  
+    
+    //METHODS
     // Override TorrentClientProtocol method
     void chunkDownloadSuccess(const Chunk& chunk);
     // Override TorrentClientProtocol method
@@ -27,10 +28,28 @@ class TorrentClient : public TorrentClientProtocol {
     
     // Given a path to a torrent file and a download location, download any
     // missing chunks, and upload all chunks we have.
-    
     int start();
     // Stop downloads/uploads of a given torrent file.
     int stop();
+    
+    //PUBLIC TYPES
+    class FileNotFound : public std::logic_error {
+      public:
+        explicit FileNotFound(const std::string& filename)
+        : logic_error("File " + filename + " not found."), m_filename(filename)
+        {
+        }
+      private:
+        std::string m_filename;
+    };
+    
+    class BadTorrentFile : public std::logic_error {
+      public:
+        BadTorrentFile(const std::string& what)
+        : logic_error(what)
+        {
+        }
+    };
   private:
     //DATA
     std::string m_downloadLocation;

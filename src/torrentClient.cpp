@@ -5,36 +5,39 @@
 #include <torrent.hpp>
 #include <fstream>
 #include <vector>
+#include <utility>
 #include <sha1hash.hpp>
 
 using namespace std;
 
+typedef pair<string, size_t> FileTuple;
+
 namespace torrent {
 // REVIEW: Re-order to match order of declaration
     //Parse the torrent file, but don't do anything else.
-    TorrentClient::TorrentClient(const std::string& torrentFile,
-                                 const std::string& downloadLocation)
+    TorrentClient::TorrentClient(const string& torrentFile,
+                                 const string& downloadLocation)
     : m_downloadLocation(downloadLocation), m_seeder(*this),
       m_leecher(*this), m_uploading(false)
     {
         ifstream in(torrentFile);
         if (!in) {
-            //TODO: throw an error: nonexistant file.
+            throw FileNotFound(torrentFile);
         }
         
         try {
             m_torrent = TorrentParserUtil::parseFile(in);
         } catch (TorrentParserUtil::ParseError e) {
-            //TODO: throw an error: bad file format.
+            throw BadTorrentFile(torrentFile + " has a bad format.");
         }
         in.close();
     }
     
-    // TODO: Currently only handles single file torrents.
     // Assumption: the torrent file list is in chunk order.
             // This assumption can be removed by adding seeks.
     // Assumption: telling the seeder to upload something multiple times
             // or leecher to download something multiple times works properly
+    // Assumption: None of the files to be downloaded/uploaded are empty.
     int TorrentClient::start()
     {
         // If already uploading, return.
@@ -43,50 +46,121 @@ namespace torrent {
         int errVal;
         m_downloadList.clear();
         m_uploadList.clear();
-        string filename = m_torrent.getName();
+        //string filename = m_torrent.getName();
+        vector<FileTuple> filenames
+                = m_torrent.getFileTuples();
+        vector<FileTuple>::iterator current
+                = filenames.begin();
+        vector<FileTuple>::iterator end
+                = filenames.end();
+        size_t total_read = 0; // Total amount of the torrent file we read.
+        // Amount to read before we must switch to the next file.
+        size_t file_limit = current->second;
+        // Amount we have read in this file.
+        size_t file_offset = 0;
+        // Amount we have read of the current chunk
+            // (only used for chunks that span multiple files
+        size_t chunk_offset = 0;
+        size_t size = m_torrent.getPieceLength();
+        char *buffer = new char[size];
+        list<ChunkInfo> chunks = m_torrent.getChunks();
+        
         //To see how far we are in the download, open the download
         // file (if it exists), start examining checksums, and based
         // on this determine whether or not to download that chunk.
-        ifstream in(m_downloadLocation + filename);
-        if (!in) {
-            //File does not exist: put all chunkInfo in download list.
-            m_downloadList = list<ChunkInfo>(m_torrent.getChunks());
-        }
-        else {
-            size_t size = m_torrent.getPieceLength();
-// REVIEW: Not legal in C++ make this either a vector<char> 
-// or dynamic array
-            char buffer[size];
+        ifstream in(m_downloadLocation + current->first);
+        
 // REVIEW: You do not seem to mutate this object, make this a const reference
-            for (ChunkInfo chunkInfo : m_torrent.getChunks()) {
-                //try {
-                    in.read(buffer, size);
-                    size_t amount_read = size;
-                    if (!in) {
-                        // If we reached the end of the file, we read less.
-                        amount_read = in.gcount();
+        for (list<ChunkInfo>::iterator curChunk = chunks.begin();
+                curChunk != chunks.end(); curChunk++) {
+            // This loop deals with all cases where we must skip/
+            // move on to the next file.
+            // If file does not exist or we went past the end of the file:
+            while (!in || total_read >= file_limit) {
+                in.close();
+                //Only need to skip chunks if the file does not exist.
+                //Otherwise, keep chunk_offset, etc same.
+                if (total_read < file_limit) {
+                    // Skip all chunks, bytes that were from this file.
+                    // Calculate index of next byte to read.
+                    int curChunkIndex = total_read / size;
+                    int nextChunkIndex = (file_limit - 1) / size + 1;
+                    int nextByte = nextChunkIndex * size;
+                    for (int j = curChunkIndex; j < nextChunkIndex; j++) {
+                        // These chunks need to be downloaded.
+                        m_downloadList.push_back(*curChunk);
+                        curChunk++;
                     }
-                    
+                    // file_offset can be nonzero if the skipped chunk
+                    // included some bytes of this file.
+                    file_offset = nextByte - file_limit;
+                    chunk_offset = 0;
+                    total_read = nextByte;
+                }
+                else {
+                    // If we are in the middle of a chunk, and opened a new
+                    // file to read the rest of this chunk, file_offset
+                    // should be zero.
+                    file_offset = 0;
+                    if (chunk_offset > 0) {
+                        // We already incremented curChunk due to the for loop,
+                        // but we are not through processing it.
+                        curChunk--;
+                    }
+                }
+                // Skip to the next file.
+                current++;
+                if (current == end) {
+                    break; //Exit while loop, then break out of for loop.
+                }
+                
+                file_limit += current->second;
+                in.open(m_downloadLocation + current->first);
+                // The while loop will check if the condition is properly met.
+            }
+            if (current == end) {
+                // If there are no more files to read, exit for loop.
+                break;
+            }
+            //try {
+                in.read(buffer + chunk_offset, size - chunk_offset);
+                size_t amount_read = size;
+                if (!in) {
+                    // If we reached the end of the file, we read less.
+                    amount_read = in.gcount();
+                }
+                
+                chunk_offset += amount_read;
+                file_offset += amount_read;
+                total_read += amount_read;
+                // Only compare checksums if we have the whole chunk:
+                // This is either if we have read size bytes or reach the
+                // end of the last file.
+                if (chunk_offset == size || (current + 1) == end) {
                     // Check the checksum of this part of the file.
                     // If the checksum matches, we have already downloaded
                     // this chunk: upload instead of downloading it.
 // REVIEW: C-style casts are the devil, static_cast instead
-                    if (chunkInfo.getChunkHash() == SHA1Hash((unsigned char *)(buffer), amount_read)) {
+                    if (curChunk->getChunkHash()
+                            == SHA1Hash((unsigned char*)(buffer), amount_read)) {
                         m_uploadList.push_back(
-                            Chunk(chunkInfo,
-                                  vector<char>(buffer, buffer + amount_read)));
+                            Chunk(*curChunk, vector<char>(buffer, buffer + amount_read)));
                     }
                     else {
-                        m_downloadList.push_back(chunkInfo);
+                        m_downloadList.push_back(*curChunk);
                     }
-                    
-                //}
-                //catch () {
-                    //Catch IO errors, handle
-                //}
-            }
+                    chunk_offset = 0;
+                }
+            //}
+            //catch () {
+                //Catch IO errors, handle them
+                //Close input stream, delete buffer if returning/throwing.
+            //}
+        }
+        if (in.is_open()) {
             in.close();
         }
+        delete[] buffer;
         
         // We now have a list of chunks to download, and a list of chunks
         // to upload.  Tell the seeders/leechers to start downloading.
@@ -114,7 +188,7 @@ namespace torrent {
             return errVal;
         list<ChunkInfo> uploadMetadata;
 // REVIEW: Make this a Chunk& or use std::move to prevent copy and destruction
-        for (Chunk c : m_uploadList) {
+        for (Chunk& c : m_uploadList) {
             uploadMetadata.push_back(c.getMetadata());
         }
         //if ((errVal = m_seeder.stopUploading(m_uploadList)) != 0)
@@ -136,8 +210,7 @@ namespace torrent {
     }
     void TorrentClient::chunkDownloadSuccess(const Chunk& chunk)
     {
-// REVIEW: you do not seem to modify the metaInfo, so why is this not a const&?
-        ChunkInfo metadata = chunk.getMetadata();
+        const ChunkInfo& metadata = chunk.getMetadata();
         //Remove this chunk from our download list.
         // TODO: is this step necessary? O(n), could be chagned to O(log(n))
         for (auto iter = m_downloadList.begin(); iter != m_downloadList.end(); iter++) {
@@ -147,12 +220,29 @@ namespace torrent {
             }
         }
         // Save chunk to disk.
-        // TODO: Assumes only one file, one download location.
-        ofstream out(m_downloadLocation + m_torrent.getName());
-        // TODO: handle write errors.
-        out.seekp(metadata.getChunkId() * m_torrent.getPieceLength());
-        out.write(chunk.getBuffer().data(), chunk.getBuffer().size());
-        out.close();
+        // First, figure out what bytes these are in our torrent.
+        size_t start = metadata.getChunkId() * m_torrent.getPieceLength();
+        size_t end = start + chunk.getBuffer().size();
+        size_t current_byte = 0;
+        size_t chunk_offset = 0;
+        vector<FileTuple> files = m_torrent.getFileTuples();
+        ofstream out;
+        for (unsigned int i = 0; i < files.size(); i++) {
+            // Skip files not containing our chunk.
+            if (current_byte + files[i].second <= start) {
+                current_byte += files[i].second;
+                continue;
+            }
+            int write_amount = min(files[i].second, end - start - chunk_offset);
+            out.open(m_downloadLocation + files[i].first);
+            // TODO: handle write errors.
+            out.seekp(start - current_byte);
+            out.write(chunk.getBuffer().data() + chunk_offset, write_amount);
+            out.close();
+            chunk_offset += write_amount;
+            if (start + chunk_offset >= end)
+                break;
+        }
         // Now add the chunk to our upload list, upload it.
         // TODO: this breaks the order of the list.  Do we care?
         m_uploadList.push_back(chunk);
