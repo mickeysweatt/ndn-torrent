@@ -1,44 +1,49 @@
 // bencdeParserUtil.cpp                                                -*-C++-*-
 #include <bencodeParserUtil.hpp>
+
+#include <exception>
+#include <functional>
+#include <memory>
+
 #include <string>
 #include <istream>
 #include <cassert>
 
 using std::list;
 using std::string;
+using std::istream;
+using std::shared_ptr;
 
 namespace torrent {
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 //                       BencodeParserUtil
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
-    BencodeToken& BencodeParserUtil::parseStream(std::istream& ifs) {
-        BencodeToken *curr_tok_p = nullptr;
+    shared_ptr<BencodeToken> BencodeParserUtil::parseStream(istream& ifs) {
+        shared_ptr<BencodeToken> curr_tok_p = nullptr;
         char   type;
         type = ifs.peek();
         
         switch(type) {
             case 'i': {
-                curr_tok_p = new BencodeIntegerToken(ifs);
+                curr_tok_p = std::make_shared<BencodeIntegerToken>(ifs);
             } break;
             case 'l' : {
-                curr_tok_p = new BencodeList(ifs);
+                curr_tok_p = std::make_shared<BencodeList>(ifs);
             } break;
             case 'd': {
-                curr_tok_p = new BencodeDict(ifs);
+                curr_tok_p = std::make_shared<BencodeDict>(ifs);
             } break;
             default: {
                 // byte string
                 if (isdigit(type)) {
-                    curr_tok_p = new BencodeByteStringToken(ifs);
+                    curr_tok_p =  std::make_shared<BencodeByteStringToken>(ifs);
                 }
                 else {
                     throw new ParseError("Unrecognized type.");
                 }
             }
         }
-// REVIEW: seems a little odd to return a reference variable to allocated memory
-// that if the callee is responsible for deleting it
-        return *curr_tok_p;
+        return curr_tok_p;
     }
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -81,16 +86,13 @@ namespace torrent {
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
     BencodeList::BencodeList(std::istream& in)
     {
-// REVIEW: consistency in pointer declaration; elsewhere you put the * next to
-// the variable name
-        BencodeToken* curr_tok;
+        shared_ptr<BencodeToken> curr_tok_p = nullptr;
         assert('l' == in.peek());
         // consume the l
         in.get(); 
         while ('e' != in.peek()) {
-            curr_tok = &BencodeParserUtil::parseStream(in);
-// REVIEW: possible memory leak; do the tokens ever get deleted?
-            m_tokens.push_back(curr_tok);
+            curr_tok_p = BencodeParserUtil::parseStream(in);
+            m_tokens.push_back(std::move(curr_tok_p));
         }
         in.get();
     }
@@ -106,26 +108,23 @@ namespace torrent {
     
     BencodeDict::BencodeDict(std::istream& in) : m_dict(keyComparator)
     {
-        BencodeToken *value;
-        BencodeByteStringToken *key;
-        if ('d' != in.peek()) {
-            throw new BencodeParserUtil::ParseError("Bad dict");
-        }
+        std::shared_ptr<BencodeToken>           value;
+        std::shared_ptr<BencodeByteStringToken> key; 
+        assert('d' == in.peek());
         // consume the 'd'
         in.get();
         while ('e' != in.peek()) {
-            key = dynamic_cast<BencodeByteStringToken *>(
-                                           &BencodeParserUtil::parseStream(in));
+            key = std::dynamic_pointer_cast<BencodeByteStringToken>(
+                                            BencodeParserUtil::parseStream(in));
             assert(nullptr != key);
-            value = &BencodeParserUtil::parseStream(in);
-// REVIEW: possibly memory leak; are the tokens ever deleted?
-            m_dict[std::move(*key)] = value;
+            value = BencodeParserUtil::parseStream(in);
+            m_dict[std::move(std::move(*key))] = value;
         }
         in.get();
     }
     
     const std::map<BencodeByteStringToken,
-                   BencodeToken*,
+                   std::shared_ptr<BencodeToken>,
                    BencodeDict::BencodeDictComparator>& 
     BencodeDict::getValues() const
     {
