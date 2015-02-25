@@ -3,6 +3,7 @@
 
 #include <list>
 #include <sha1hash.hpp>
+#include <filePiece.hpp>
 
 namespace torrent{
 
@@ -23,6 +24,8 @@ public:
 
 	SHA1Hash getChunkHash() const; // Get Chunk Hash Value
 
+	std::list<FilePiece> getFilePieceList() const; // Get FilePiece List
+
 	//std::list<FilePiece> getChunkFileList(); 
 	//Returns a list of 'FilePiece' contained in the Chunk
 
@@ -30,14 +33,14 @@ public:
 
 private:
 	SHA1Hash m_hash;
-	//std::list<FilePiece> m_file_pieces; // TODO: Hannah
+	std::list<FilePiece> m_file_pieces; // TODO: Hannah
 	size_t m_id;
 };
 
 // INLINE ACCESSORS
 inline size_t ChunkInfo::getChunkId() const { return m_id; }
 inline SHA1Hash ChunkInfo::getChunkHash() const { return m_hash; }
-//inline std::list<FilePiece> ChunkInfo::getChunkFileList() { return m_file_pieces; }
+inline std::list<FilePiece> ChunkInfo::getFilePieceList() const { return m_file_pieces; }
 
 }
 
