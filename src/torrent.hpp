@@ -2,6 +2,7 @@
 #define INCLUDED_TORRENT_HPP
 
 #include <list>
+#include <unordered_set>
 #include <vector>
 #include <string>
 #include <chunkInfo.hpp>
@@ -16,7 +17,6 @@ class Torrent {
     
     // A value-semantic attribute class for torrents. 
   public:
-    
     // CREATORS
     Torrent() = default;
     // Create an empty 'torrent'.
@@ -26,24 +26,30 @@ class Torrent {
     
     Torrent(const Torrent& other) = default;
 
-    Torrent(std::list<std::string>& announceList, 
-            std::string&            name,
-            size_t                  pieceLength,
-            size_t                  fileLength,
-            std::vector<char>       pieces);
+    Torrent(const std::unordered_set<std::string>& announceList,
+            std::string&                           name,
+            size_t                                 pieceLength,
+            size_t                                 fileLength,
+            const std::vector<char>&               pieces);
     
-    Torrent(std::list<std::string>&              announceList,
-            std::string&                         name,
-            size_t                               pieceLength,
-            const std::vector<const FileTuple&>& fileTuples,
-            const std::vector<char>&             pieces);
+    Torrent(std::unordered_set<std::string>&& announceList,
+            std::string&&                     name,
+            size_t                            pieceLength,
+            std::list<FileTuple>&&            files,
+            std::vector<char>&&               pieces);
+    
+    Torrent(const std::unordered_set<std::string>& announceList,
+            std::string&                     name,
+            size_t                           pieceLength,
+            const std::list<FileTuple>&    fileTuples,
+            const std::vector<char>&         pieces);
     
     Torrent(Torrent&& other);
         // Move the value of the specified 'other' object into this
         // object.
     
     // ACCESSORS
-    const std::list<std::string>& getAnnounceURLList() const;
+    const std::unordered_set<std::string>& getAnnounceURLList() const;
     // Return the list with all the the domains for all trackers for this
     // torrent
 
@@ -68,7 +74,7 @@ class Torrent {
   
   private:
     // DATA
-    std::list<std::string>  m_announceList;
+    std::unordered_set<std::string>  m_announceList;
     std::string             m_name;
     size_t                  m_pieceLength;
     std::list<ChunkInfo>    m_chunks;

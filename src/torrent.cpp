@@ -5,27 +5,44 @@
 namespace torrent {
 	// TODO: Hannah
 	// Single File
-    Torrent::Torrent(std::list<std::string>& announceList,
-                      std::string&            name,
-                      size_t                  pieceLength,
-                      size_t                  fileLength,
-                      std::vector<char>       pieces)
-     : m_name(name), m_pieceLength(pieceLength)
+    Torrent::Torrent(const std::unordered_set<std::string>& announceList,
+                     std::string&                     name,
+                     size_t                           pieceLength,
+                     size_t                           fileLength,
+                     const std::vector<char>&         pieces)
+     : m_announceList(announceList)
+     , m_name(name)
+     , m_pieceLength(pieceLength)
      {
-		memcpy(&m_announceList, &announceList, sizeof(announceList));
+         // TODO
      }
     
     // Multiple Files
-    Torrent::Torrent(std::list<std::string>&              announceList,
-                     std::string&                         name,
-                     size_t                               pieceLength,
-                     const std::vector<const FileTuple&>& fileTuples,
-                     const std::vector<char>&             pieces)
-    : m_name(name), m_pieceLength(pieceLength)
+    Torrent::Torrent(const std::unordered_set<std::string>& announceList,
+                     std::string&                           name,
+                     size_t                                 pieceLength,
+                     const std::list<FileTuple>&          fileTuples,
+                     const std::vector<char>&               pieces)
+    : m_announceList(announceList)
+    , m_name(name)
+    , m_pieceLength(pieceLength)
     {
         // TODO
     }
-
+    
+    // MOVE
+    Torrent::Torrent(std::unordered_set<std::string>&& announceList,
+                     std::string&&                     name,
+                     size_t                            pieceLength,
+                     std::list<FileTuple>&&          files,
+                     std::vector<char>&&               pieces)
+    : m_announceList(announceList)
+    , m_name(name)
+    , m_pieceLength(pieceLength)
+    {
+        // TODO
+    }
+    
     Torrent::Torrent(Torrent&& other)
     : m_announceList(std::move(other.m_announceList)),
       m_name(std::move(other.m_name)),
@@ -34,7 +51,7 @@ namespace torrent {
     {
     }
 
-    const std::list<std::string>& Torrent::getAnnounceURLList() const
+    const std::unordered_set<std::string>& Torrent::getAnnounceURLList() const
     {
         return m_announceList;
     }

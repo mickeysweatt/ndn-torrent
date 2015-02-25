@@ -3,16 +3,15 @@
 #include <bencodeParserUtil.hpp>
 #include <torrent.hpp>
 #include <istream>
-
 #include <map>
-#include <set>
+#include <unordered_set>
 #include <iostream>
 
 #include <cassert>
 
 using std::string;
 using std::list;
-using std::set;
+using std::unordered_set;
 using std::pair;
 using std::vector;
 using std::map;
@@ -27,23 +26,23 @@ namespace torrent {
     
     static void getInfoCommon(const BencodeDict& infoDict,
                               std::string&       name,
-                              int&               pieceLength,
+                              size_t&            pieceLength,
                               std::vector<char>& pieces);
 
     static void getInfoMultiFileTorrent(const BencodeDict&         infoDict,
-                                        set<pair<string, size_t> > files,
+                                        list<pair<string, size_t> > files,
                                         string&                    name,
-                                        int&                       pieceLength,
+                                        size_t&                    pieceLength,
                                         vector<char>&              pieces);
 
     static void getInfoSingleFileTorrent(const BencodeDict& infoDict,
-                                         int&               fileLength,
+                                         size_t&            fileLength,
                                          std::string&       name,
-                                         int&               pieceLength,
+                                         size_t&            pieceLength,
                                          std::vector<char>& pieces);
 
     static 
-    set<string> getAnnounceList(shared_ptr<BencodeList> announceListToken);
+    unordered_set<string> getAnnounceList(shared_ptr<BencodeList> announceListToken);
 }
 
 //==============================================================================
@@ -57,7 +56,7 @@ namespace torrent {
     
     static void getInfoCommon(const BencodeDict& infoDict,
                               std::string&       name,
-                              int&               pieceLength,
+                              size_t&               pieceLength,
                               std::vector<char>& pieces)
     {
         auto pieceLengthTokenPtr = 
@@ -78,9 +77,9 @@ namespace torrent {
     }
     
     static void getInfoMultiFileTorrent(const BencodeDict&        infoDict,
-                                        set<pair<string, size_t>> files,
+                                        list<pair<string, size_t> > files,
                                         string&                   name,
-                                        int&                      pieceLength,
+                                        size_t&                      pieceLength,
                                         vector<char>&             pieces)
     {
         auto fileListToken  = dynamic_pointer_cast<const BencodeList >(
@@ -106,16 +105,16 @@ namespace torrent {
                            dynamic_pointer_cast<const BencodeIntegerToken>(
                                    fileDict->find("length")->second);
             assert (nullptr != lengthToken);
-            files.insert(std::pair<string, size_t>(pathString, 
-                                                   lengthToken->getValue()));
+            files.push_back(std::make_pair(pathString,
+                                           lengthToken->getValue()));
         }
         getInfoCommon(infoDict, name, pieceLength, pieces);
     }
     
     static void getInfoSingleFileTorrent(const BencodeDict& infoDict,
-                                         int&               fileLength,
+                                         size_t&               fileLength,
                                          std::string&       name,
-                                         int&               pieceLength,
+                                         size_t&               pieceLength,
                                          std::vector<char>& pieces)
     {
         getInfoCommon(infoDict, name, pieceLength, pieces);
@@ -127,9 +126,9 @@ namespace torrent {
     }
 
     static 
-    set<string> getAnnounceList(shared_ptr<BencodeList> announceListToken)
+    std::unordered_set<string> getAnnounceList(shared_ptr<BencodeList> announceListToken)
     {
-        std::set<string> announcelist;
+        std::unordered_set<string> announcelist;
         std::shared_ptr<BencodeList> currList;
         assert(nullptr != announceListToken);
         // unpack announce-list
@@ -157,10 +156,10 @@ namespace torrent {
         Torrent t;
         shared_ptr<BencodeDict> ast;
         shared_ptr<BencodeByteStringToken>announceToken;
-        set<string> announceList;
-        set<pair<string, size_t>> files;
+        unordered_set<string> announceList;
+        list<pair<string, size_t>> files;
 
-         int pieceLength, fileLength;
+         size_t pieceLength, fileLength;
          string name;
          vector<char> pieces;
          map<BencodeByteStringToken, 
@@ -181,7 +180,7 @@ namespace torrent {
          // torrents are weird, and have an "announce" and "announce-list"
          announceList.insert(announceToken->getString());
          if (isMultiFileTorrent(dynamic_cast<BencodeDict&>(
-                                                         *torrentDict["info"]))) 
+                                                         *torrentDict["info"])))
          {
              getInfoMultiFileTorrent(
                                dynamic_cast<BencodeDict&>(*torrentDict["info"]),
@@ -189,6 +188,11 @@ namespace torrent {
                                                            name, 
                                                            pieceLength, 
                                                            pieces);
+             t = Torrent(announceList,
+                         name,
+                         pieceLength,
+                         files,
+                         pieces);
          }
          else {
              getInfoSingleFileTorrent(
@@ -197,6 +201,7 @@ namespace torrent {
                                                            name, 
                                                            pieceLength, 
                                                            pieces);
+             t = Torrent(announceList, name, pieceLength, fileLength, pieces);
          }
         return std::move(t);
     }
