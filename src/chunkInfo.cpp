@@ -1,5 +1,6 @@
 #include <cstring>
 #include <chunkInfo.hpp>
+#include <filePiece.hpp>
 #include <sha1hash.hpp>
 
 namespace torrent{

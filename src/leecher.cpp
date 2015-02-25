@@ -1,22 +1,92 @@
-#include "chunk.hpp"
-#include "chunkInfo.hpp"
+#include <chunk.hpp>
+#include <chunkInfo.hpp>
 #include <leecher.hpp>
+#include <ndn-cxx/contexts/consumer-context.hpp>
+#include <ndn-cxx/name.hpp>
+#include <string>
+#include <vector>
+#include <sstream>
+
+using std::vector;
+using std::string;
+using std::bind;
+using ndn::Name;
+
+namespace {
+    using torrent::ChunkInfo;
+    using torrent::Chunk;
+    using torrent::TorrentClientProtocol;
+
+   class ChunkCallback {
+       // DATA
+       const ChunkInfo& m_chunkInfo;
+       TorrentClientProtocol& m_clientProtocol;
+      public:
+        ChunkCallback(const ChunkInfo& chunkInfo, TorrentClientProtocol& clientProtocol) 
+        : m_chunkInfo(chunkInfo), m_clientProtocol(clientProtocol)
+        {
+        }
+
+        void
+        processPayload(const uint8_t* buffer, size_t bufferSize)
+        {
+
+            auto begin = reinterpret_cast<const char *>(buffer);
+            vector<char> content(begin, begin + bufferSize);
+            Chunk newChunk(m_chunkInfo, std::move(content));
+            // compute hash and compare
+
+            // if hashes match
+
+            m_clientProtocol.chunkDownloadSuccess(newChunk);
+        }
+   };
+}
 
 namespace torrent{
    Leecher::Leecher(TorrentClientProtocol& clientProtocol)
    : m_clientProtocol(clientProtocol)
    {
    }
-   Leecher::~Leecher() {}
+   Leecher::~Leecher() 
+   {
+   }
+
+   int Leecher::download(const ChunkInfo& chunkInfo)
+   {
+        ndn::Name chunkName("come up with a name with namespace info");
+      
+        ChunkCallback cb(chunkInfo, m_clientProtocol);
+
+        ndn::Consumer c(chunkName, RDR);
+        // use API to request chunk with id in ChunkInfo
+        c.setContextOption(CONTENT_RETRIEVED, 
+                    (ndn::ContentCallback)std::bind(&ChunkCallback::processPayload, &cb, _1, _2));
+        /*
+    int number = 1234;
+
+    std::ostringstream ostr; //output string stream
+    ostr << number; //use the string stream just like cout,
+    //except the stream prints not to stdout but to a string.
+
+    std::string theNumberString = ostr.str();
+        */
+        std::ostringstream ostr; //output string stream
+        ostr << chunkInfo.getChunkId();
+        c.consume(ndn::Name(ostr.str())); // double check
+   }
+
    int Leecher::download(const std::list<ChunkInfo>& chunkInfoList)
    {
+        for (auto it : chunkInfoList) {
 
-   	return 0;
+        }
+        return 0;
    }
 
    int Leecher::stopDownload(const std::list<ChunkInfo>& chunkInfoList)
    {
 
-   	return 0;
+    return 0;
    }
 }

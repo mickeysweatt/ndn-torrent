@@ -1,8 +1,10 @@
 #include <torrent.hpp>
 #include <chunkInfo.hpp>
+#include <filePiece.hpp>
 
 namespace torrent {
 	// TODO: Hannah
+	// Single File
     Torrent::Torrent(std::list<std::string>& announceList,
                       std::string&            name,
                       size_t                  pieceLength,
@@ -13,11 +15,13 @@ namespace torrent {
 		memcpy(&m_announceList, &announceList, sizeof(announceList));
      }
     
+    // Multiple Files
     Torrent::Torrent(std::list<std::string>&              announceList,
                      std::string&                         name,
                      size_t                               pieceLength,
                      const std::vector<const FileTuple&>& fileTuples,
                      const std::vector<char>&             pieces)
+    : m_name(name), m_pieceLength(pieceLength)
     {
         // TODO
     }

@@ -14,6 +14,8 @@ class FilePiece
 
   	FilePiece(std::string name, size_t start, size_t end, size_t length);
 
+  	~FilePiece();
+
   	// ACCESSORS
   	std::string getFilePieceName();
 
@@ -37,5 +39,4 @@ inline std::pair<size_t, size_t> FilePiece::getFilePieceOffsets()
 }
 
 }
-
 #endif // INCLUDED_FILEPIECE_HPP

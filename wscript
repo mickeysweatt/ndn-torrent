@@ -7,7 +7,7 @@ def options(opt):
 
 def configure(conf):
     conf.check_tool("compiler_cxx")
-    conf.env.append_value('CXXFLAGS', ['-O2', '-g', '-std=c++0x', '-Wall', '-Wextra', '-Weverything'])
+    conf.env.append_value('CXXFLAGS', ['-O2', '-g', '-std=c++0x', '-Wall', '-Wextra'])
     conf.env.LIBPATH_MYLIB = ['/usr/local/lib']
     conf.check(compiler='cxx',
                lib='cryptopp',
