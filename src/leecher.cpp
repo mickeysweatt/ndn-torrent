@@ -7,6 +7,8 @@
 #include <vector>
 #include <sstream>
 
+#include <cassert>
+
 using std::vector;
 using std::string;
 using std::bind;
@@ -30,15 +32,21 @@ namespace {
         void
         processPayload(const uint8_t* buffer, size_t bufferSize)
         {
-
             auto begin = reinterpret_cast<const char *>(buffer);
             vector<char> content(begin, begin + bufferSize);
             Chunk newChunk(m_chunkInfo, std::move(content));
+            
             // compute hash and compare
-
+            torrent::SHA1Hash sha1(reinterpret_cast<const unsigned char *>(buffer),
+                          static_cast<unsigned long>(bufferSize));
             // if hashes match
-
-            m_clientProtocol.chunkDownloadSuccess(newChunk);
+            if ( sha1 == m_chunkInfo.getChunkHash() )
+                m_clientProtocol.chunkDownloadSuccess(newChunk);
+            else { // hash doesn't match
+                // FIXME
+                assert(false && "hash did not match");
+            }
+                //TODO
         }
    };
 }
@@ -74,6 +82,7 @@ namespace torrent{
         std::ostringstream ostr; //output string stream
         ostr << chunkInfo.getChunkId();
         c.consume(ndn::Name(ostr.str())); // double check
+       return 0;
    }
 
    int Leecher::download(const std::list<ChunkInfo>& chunkInfoList)

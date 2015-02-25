@@ -28,7 +28,7 @@ namespace torrent {
         try {
             m_torrent = TorrentParserUtil::parseFile(in);
         } catch (TorrentParserUtil::ParseError e) {
-            throw BadTorrentFile(torrentFile + " has a bad format.");
+            throw new BadTorrentFile(torrentFile + " has a bad format.");
         }
         in.close();
     }

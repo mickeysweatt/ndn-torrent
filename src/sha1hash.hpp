@@ -19,7 +19,7 @@ class SHA1Hash
   	SHA1Hash(const unsigned char *data, unsigned long length);
   	// Create a 'SHA1Hash' from data, use SHA1() to compute 
   	// the 'hash' and store it in m_hash.
-
+    
   	// FRIENDS
   	friend bool operator==(const SHA1Hash& lhs, const SHA1Hash& rhs);
   private:
@@ -28,11 +28,9 @@ class SHA1Hash
 
 inline bool operator==(const torrent::SHA1Hash& lhs, const torrent::SHA1Hash& rhs)
 {
- return 0 == memcmp(lhs.m_hash, rhs.m_hash, 20);
+    return 0 == memcmp(lhs.m_hash, rhs.m_hash, 20);
 }
 
 }
-
-
 
 #endif // INCLUDED_SHA_HPP
