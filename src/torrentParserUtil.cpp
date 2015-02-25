@@ -75,7 +75,6 @@ namespace torrent {
         name        = nameTokenPtr->getString();
         pieceLength = pieceLengthTokenPtr->getValue();
         pieces      = piecesTokenPtr->getValue();
-        int *buffer = new int[4];
     }
     
     static void getInfoMultiFileTorrent(const BencodeDict&        infoDict,
