@@ -7,23 +7,22 @@
 
 namespace torrent {
 
-// REVIEW: Forward declaration redundant with the include
-class ChunkInfo;
-
 class Chunk {
 	 // A class that contains metadata and the actual data on a chunk.
 public:
 	 // CREATORS
-// REVIEW: Switch these to '=default'
-	 Chunk();
+	 Chunk() = default;
 	 // Creates an empty chunk.
-// REVIEW: Add a move ctor here, ask me if you have any questions about this
-//   Chunk(ChunkInfo&& metadata, std::vector<char>&& buffer);
+
 	 Chunk(const ChunkInfo& metadata, const std::vector<char>& buffer);
 	 // Creates a chunk and initializes the metadata and data.
 
-// REVIEW: Switch these to '=default'
-	 ~Chunk();
+   Chunk(ChunkInfo&& metadata, std::vector<char>&& buffer);
+	 // Creates a chunk by moving in metadata and data.
+
+	 Chunk& operator=(const Chunk& other) = default;
+
+	 ~Chunk() = default;
 	 // Destroys this object.
 
 	 // ACCESSORS
@@ -34,10 +33,10 @@ public:
 	 // Returns the buffer containing the data for this chunk.
 
 	 // MUTATORS
-	 int setMetadata(const ChunkInfo& metadata);
+	 void setMetadata(const ChunkInfo& metadata);
 	 // Sets the metadata for this chunk.
 
-	 int setBuffer(const std::vector<char>& buffer);
+	 void setBuffer(const std::vector<char>& buffer);
 	 // Sets the data for this chunk.
 
 private:
@@ -53,16 +52,13 @@ private:
 //                       INLINE FUNCTION DEFINTIONS
 //==============================================================================
 
-inline Chunk::Chunk()
-{
-}
-
 inline Chunk::Chunk(const ChunkInfo& metadata, const std::vector<char>& buffer)
 	 : m_metadata(metadata), m_buffer(new std::vector<char>(buffer))
 {
 }
 
-inline Chunk::~Chunk()
+inline Chunk::Chunk(ChunkInfo&& metadata, std::vector<char>&& buffer)
+	 : m_metadata(std::move(metadata)), m_buffer(new std::vector<char>(std::move(buffer)))
 {
 }
 
@@ -76,27 +72,16 @@ inline const std::vector<char>& Chunk::getBuffer() const
 	 return *m_buffer;
 }
 
-// REVIEW: Why the return code? Does not sem to be doing anything
-inline int Chunk::setMetadata(const ChunkInfo& metadata)
+inline void Chunk::setMetadata(const ChunkInfo& metadata)
 {
 	 m_metadata = metadata;
-	 return -1;
 }
 
-// REVIEW: Why the return code? Does not sem to be doing anything
-inline int Chunk::setBuffer(const std::vector<char>& buffer)
+inline void Chunk::setBuffer(const std::vector<char>& buffer)
 {
 	 m_buffer = std::shared_ptr<std::vector<char>>(new std::vector<char>(buffer));
-	 return -1;
 }
 
 } // namespace torrent
 
 #endif // INCLUDED_CHUNK_HPP
-
-
-// REVIEW: Return codes should either be removed or made useful and explained, 
-// and the default ctor and destructor should be just declared as the default 
-// (my bad on the bad example) for the sake of alloiwng zero initialization and
-// not depricating the default ctor and assignment operator
-// (which you should also declare) 

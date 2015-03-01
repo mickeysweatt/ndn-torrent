@@ -34,7 +34,7 @@ public:
 void assertValidContent(uint8_t validator, const uint8_t *buffer, size_t bufferSize)
 {
 	 numConsumed++;
-	 for (int i = 0; i < bufferSize; i++)
+	 for (size_t i = 0; i < bufferSize; i++)
 	 {
 			if (validator != buffer[i])
 			{
@@ -70,7 +70,6 @@ int testSeeder()
 	 seeder.upload(chunks);
 	 sleep(1);
 
-	 char nameBuffer[4];
 	 for (size_t i = 0; i < N_PACKETS; i++)
 	 {
 			std::string chunkName = "/torrent/dummyFile/";
