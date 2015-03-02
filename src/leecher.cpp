@@ -26,7 +26,8 @@ namespace {
        const torrent::Leecher& m_leecher;
        
       public:
-       ChunkCallback(const ChunkInfo& chunkInfo, const torrent::Leecher& leecher)
+       ChunkCallback(const ChunkInfo&        chunkInfo, 
+                     const torrent::Leecher& leecher)
         : m_chunkInfo(chunkInfo)
         , m_leecher(leecher)
         {
@@ -48,7 +49,8 @@ namespace {
 }
 
 namespace torrent {
-    Leecher::Leecher(const ndn::Name& prefix, TorrentClientProtocol& clientProtocol)
+    Leecher::Leecher(const ndn::Name& prefix, 
+                     TorrentClientProtocol& clientProtocol)
    : m_prefix(prefix)
    , m_clientProtocol(clientProtocol)
    {
@@ -56,15 +58,22 @@ namespace torrent {
 
    int Leecher::download(const ChunkInfo& chunkInfo)
    {
-        ChunkCallback cb(chunkInfo, *this);
-        ndn::Consumer c(m_prefix, RDR);
+       ChunkCallback cb(chunkInfo, *this);
+       ndn::Consumer c(m_prefix, RDR);
        // use API to request chunk with id in ChunkInfo
        c.setContextOption(MUST_BE_FRESH_S, false);
        c.setContextOption(CONTENT_RETRIEVED,
-                          static_cast<ndn::ConsumerContentCallback>(bind(&ChunkCallback::processPayload, &cb, _1, _2, _3)));
-        std::ostringstream ostr; //output string stream
-        ostr << m_prefix << "/" << chunkInfo.getChunkId();
-        c.asyncConsume(ndn::Name(ostr.str()));
+                          static_cast<ndn::ConsumerContentCallback>(
+                            bind(&ChunkCallback::processPayload, 
+                                 &cb, 
+                                 _1, 
+                                 _2, 
+                                 _3)));
+       std::ostringstream ostr; //output string stream
+       ostr << m_prefix << "/" << chunkInfo.getChunkId();
+       c.asyncConsume(ndn::Name(ostr.str()));
+       // Returning immediately, means we must make sure that this object 
+       // remains in scope.
        return 0;
    }
 
@@ -78,12 +87,14 @@ namespace torrent {
 
    int Leecher::stopDownload(const std::list<ChunkInfo>& chunkInfoList)
    {
-    return 0;
+        return 0;
    }
 
-    void Leecher::processDownloadedChunk(std::vector<char> content, const ChunkInfo& chunkInfo) const
+    void Leecher::processDownloadedChunk(std::vector<char> content, 
+                                         const ChunkInfo&  chunkInfo) const
    {
-       torrent::SHA1Hash sha1(reinterpret_cast<const unsigned char *>(content.data()),
+       torrent::SHA1Hash sha1(reinterpret_cast<const unsigned char *>(
+                                  content.data()),
                               static_cast<unsigned long>(content.size()));
         // if hashes match
         if ( sha1 == chunkInfo.getChunkHash() ) {
