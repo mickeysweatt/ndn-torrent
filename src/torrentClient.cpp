@@ -27,7 +27,7 @@ namespace torrent {
         
         try {
             m_torrent = TorrentParserUtil::parseFile(in);
-        } catch (TorrentParserUtil::ParseError e) {
+        } catch (TorrentParserUtil::ParseError& e) {
             throw BadTorrentFile(torrentFile + " has a bad format.");
         }
         in.close();
@@ -74,7 +74,7 @@ namespace torrent {
         for (list<ChunkInfo>::iterator curChunk = chunks.begin();
                 curChunk != chunks.end(); curChunk++) {
             // This loop deals with all cases where we must skip/
-            // move on to the next file.
+            // move on to the next file.`
             // If file does not exist or we went past the end of the file:
             while (!in || total_read >= file_limit) {
                 in.close();
@@ -142,7 +142,7 @@ namespace torrent {
                     // this chunk: upload instead of downloading it.
 // REVIEW: C-style casts are the devil, static_cast instead
                     if (curChunk->getChunkHash()
-                            == SHA1Hash((unsigned char*)(buffer), amount_read)) {
+                            == SHA1Hash(reinterpret_cast<unsigned char*>(buffer), amount_read)) {
                         m_uploadList.push_back(
                             Chunk(*curChunk, vector<char>(buffer, buffer + amount_read)));
                     }
@@ -165,15 +165,15 @@ namespace torrent {
         // We now have a list of chunks to download, and a list of chunks
         // to upload.  Tell the seeders/leechers to start downloading.
         
-        if (m_downloadList.size() > 0) {
-            if ((errVal = m_leecher.download(m_downloadList)) != 0)
-                return errVal;
-                // TODO: more reasonable behavior depending on return type.
-        }
         if (m_uploadList.size() > 0) {
             if ((errVal = m_seeder.upload(m_uploadList)) != 0)
                 return errVal;
             m_uploading = true;
+        }
+        if (m_downloadList.size() > 0) {
+            if ((errVal = m_leecher.download(m_downloadList)) != 0)
+                return errVal;
+                // TODO: more reasonable behavior depending on return type.
         }
         
         return 0;
@@ -187,7 +187,6 @@ namespace torrent {
         if ((errVal = m_leecher.stopDownload(m_downloadList)) != 0)
             return errVal;
         list<ChunkInfo> uploadMetadata;
-// REVIEW: Make this a Chunk& or use std::move to prevent copy and destruction
         for (Chunk& c : m_uploadList) {
             uploadMetadata.push_back(c.getMetadata());
         }
