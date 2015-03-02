@@ -18,7 +18,7 @@ namespace torrent {
     TorrentClient::TorrentClient(const string& torrentFile,
                                  const string& downloadLocation)
     : m_downloadLocation(downloadLocation), m_seeder(*this),
-      m_leecher(*this), m_uploading(false)
+    m_leecher(ndn::Name("FIXME"), *this), m_uploading(false)
     {
         ifstream in(torrentFile);
         if (!in) {

@@ -3,6 +3,8 @@
 
 #include <torrentClientProto.hpp>
 #include <list>
+#include <unordered_map>
+#include <ndn-cxx/name.hpp>
 
 namespace torrent {
 
@@ -14,10 +16,10 @@ class Leecher {
    // TorrentClientProtocol whenever it finishes downloading a chunk.   
 public:
    // CREATORS
-   explicit Leecher(TorrentClientProtocol& clientProtocol);
+    explicit Leecher(const ndn::Name& prefix, TorrentClientProtocol& clientProtocol);
    // Creates a Leecher that communicates with clientProtocol.
 
-   ~Leecher();
+   ~Leecher() = default;
    // Destroy this object.
 
    int download(const ChunkInfo& chunkInfo);
@@ -31,8 +33,11 @@ public:
    int stopDownload(const std::list<ChunkInfo>& chunkInfoList);
    // Terminates the download for chunks in chunkInfoList if possible.
 
+   void processDownloadedChunk(std::vector<char> content, const ChunkInfo& chunk) const;
+
 private:
    // DATA
+   ndn::Name              m_prefix;
    TorrentClientProtocol& m_clientProtocol;
 };
 
