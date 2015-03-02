@@ -61,7 +61,7 @@ namespace torrent {
        // use API to request chunk with id in ChunkInfo
        c.setContextOption(MUST_BE_FRESH_S, false);
        c.setContextOption(CONTENT_RETRIEVED,
-                           (ndn::ConsumerContentCallback)bind(&ChunkCallback::processPayload, &cb, _1, _2, _3));
+                          static_cast<ndn::ConsumerContentCallback>(bind(&ChunkCallback::processPayload, &cb, _1, _2, _3)));
         std::ostringstream ostr; //output string stream
         ostr << m_prefix << "/" << chunkInfo.getChunkId();
         c.asyncConsume(ndn::Name(ostr.str()));
