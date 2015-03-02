@@ -1,9 +1,13 @@
 #include <torrent.hpp>
 #include <chunkInfo.hpp>
 #include <filePiece.hpp>
+#include <cmath>
+#include <cstring>
+#include <iostream>
 
 namespace torrent {
-	// TODO: Hannah
+    const int HASHLEN = 20;
+    
 	// Single File
     Torrent::Torrent(const std::unordered_set<std::string>& announceList,
                      std::string&                     name,
@@ -14,7 +18,30 @@ namespace torrent {
      , m_name(name)
      , m_pieceLength(pieceLength)
      {
-         // TODO
+         size_t endOffset, endChunkId;
+         endChunkId = ceil(fileLength/pieceLength) - 1;
+         endOffset = fileLength % pieceLength;
+         endOffset = endOffset ? endOffset-1 : pieceLength-1;
+         FilePiece newFilePiece(name, 0, endOffset,
+                                0, endChunkId, fileLength);
+         
+         size_t currentChunkId = 0;
+         while (currentChunkId <= endChunkId)
+         {
+             unsigned char hash[HASHLEN];
+             if (HASHLEN*(currentChunkId+1) <= sizeof(pieces))
+             {
+                 memcpy(hash, &(pieces[HASHLEN*currentChunkId]), HASHLEN*sizeof(char));
+             }
+             else
+             {
+                 std::cerr << "Hash length error!" << std::endl;
+                 return;
+             }
+             ChunkInfo newChunkInfo(currentChunkId, hash);
+             newChunkInfo.addFilePiece(newFilePiece);
+             m_chunks.push_back(newChunkInfo);
+         }
      }
     
     // Multiple Files
@@ -28,6 +55,40 @@ namespace torrent {
     , m_pieceLength(pieceLength)
     {
         // TODO
+        size_t beginOffset, endOffset;
+        size_t beginChunkId, endChunkId;
+        beginOffset = 0;
+        beginChunkId = 0;
+        for (auto tuple : fileTuples) {
+            endChunkId = ceil((tuple->second() + beginOffset)/pieceLength) + beginChunkId - 1;
+            endOffset = (tuple->second() + beginOffset) % pieceLength;
+            endOffset = endOffset ? endOffset-1 : pieceLength-1;
+            FilePiece newFilePiece(tuple->first(), beginOffset, endOffset,
+                                   beginChunkId, endChunkId, tuple->first());
+            
+            size_t currentChunkId = beginChunkId;
+            if (!m_chunks.empty() && m_chunks.back().getChunkId() == beginChunkId)
+            {
+                m_chunks.back().addFilePiece(newFilePiece);
+                currentChunkId++;
+            }
+            while (currentChunkId <= endChunkId)
+            {
+                unsigned char hash[HASHLEN];
+                if (HASHLEN*(currentChunkId+1) <= sizeof(pieces))
+                {
+                    memcpy(hash, &(pieces[HASHLEN*currentChunkId]), HASHLEN*sizeof(char));
+                }
+                else
+                {
+                    std::cerr << "Hash length error!" << std::endl;
+                    return;
+                }
+                ChunkInfo newChunkInfo(currentChunkId, hash);
+                newChunkInfo.addFilePiece(newFilePiece);
+                m_chunks.push_back(newChunkInfo);
+            }
+        }
     }
     
     // MOVE

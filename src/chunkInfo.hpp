@@ -26,14 +26,14 @@ public:
 
 	std::list<FilePiece> getFilePieceList() const; // Get FilePiece List
 
-	//std::list<FilePiece> getChunkFileList(); 
-	//Returns a list of 'FilePiece' contained in the Chunk
-
 	// MUTATORS
+    void addFilePiece(const FilePiece& fp);
+    
+    void setChunkId(size_t id);
 
 private:
 	SHA1Hash m_hash;
-	std::list<FilePiece> m_file_pieces; // TODO: Hannah
+	std::list<FilePiece> m_file_pieces;
 	size_t m_id;
 };
 

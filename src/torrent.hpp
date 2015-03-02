@@ -37,7 +37,7 @@ class Torrent {
             size_t                            pieceLength,
             std::list<FileTuple>&&            files,
             std::vector<char>&&               pieces);
-    
+
     Torrent(const std::unordered_set<std::string>& announceList,
             std::string&                     name,
             size_t                           pieceLength,

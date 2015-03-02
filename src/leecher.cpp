@@ -70,15 +70,7 @@ namespace torrent{
         // use API to request chunk with id in ChunkInfo
         c.setContextOption(CONTENT_RETRIEVED, 
                     (ndn::ContentCallback)std::bind(&ChunkCallback::processPayload, &cb, _1, _2));
-        /*
-    int number = 1234;
 
-    std::ostringstream ostr; //output string stream
-    ostr << number; //use the string stream just like cout,
-    //except the stream prints not to stdout but to a string.
-
-    std::string theNumberString = ostr.str();
-        */
         std::ostringstream ostr; //output string stream
         ostr << chunkInfo.getChunkId();
         c.consume(ndn::Name(ostr.str())); // double check
