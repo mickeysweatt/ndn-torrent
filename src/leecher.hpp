@@ -20,6 +20,10 @@ public:
    ~Leecher();
    // Destroy this object.
 
+   int download(const ChunkInfo& chunkInfo);
+   // Begins the download for the chunk described by ChunkInfo, if not 
+   // already in the process of downloading.
+
    int download(const std::list<ChunkInfo>& chunkInfoList);
    // Begins the download for chunks in chunkInfoList, if not already in the
    // process of downloading.
