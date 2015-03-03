@@ -167,7 +167,7 @@ namespace torrent {
              BencodeDict::BencodeDictComparator> torrentDict;
         
          if (!in.good()) {
-             throw new ParseError("Bad stream");
+             throw ParseError("Bad stream");
          }
          ast = dynamic_pointer_cast<BencodeDict>(
                                             BencodeParserUtil::parseStream(in));
