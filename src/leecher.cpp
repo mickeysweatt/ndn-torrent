@@ -74,6 +74,7 @@ namespace torrent {
        c.asyncConsume(ndn::Name(ostr.str()));
        // Returning immediately, means we must make sure that this object 
        // remains in scope.
+
        return 0;
    }
 
