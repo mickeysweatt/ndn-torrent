@@ -18,7 +18,7 @@ namespace torrent {
     TorrentClient::TorrentClient(const string& torrentFile,
                                  const string& downloadLocation)
     : m_downloadLocation(downloadLocation), m_seeder(*this),
-      m_leecher(*this), m_uploading(false)
+    m_leecher(ndn::Name("FIXME"), *this), m_uploading(false)
     {
         ifstream in(torrentFile);
         if (!in) {
@@ -83,10 +83,10 @@ namespace torrent {
                 if (total_read < file_limit) {
                     // Skip all chunks, bytes that were from this file.
                     // Calculate index of next byte to read.
-                    int curChunkIndex = total_read / size;
-                    int nextChunkIndex = (file_limit - 1) / size + 1;
-                    int nextByte = nextChunkIndex * size;
-                    for (int j = curChunkIndex; j < nextChunkIndex; j++) {
+                    size_t curChunkIndex = total_read / size;
+                    size_t nextChunkIndex = (file_limit - 1) / size + 1;
+                    size_t nextByte = nextChunkIndex * size;
+                    for (auto j = curChunkIndex; j < nextChunkIndex; j++) {
                         // These chunks need to be downloaded.
                         m_downloadList.push_back(*curChunk);
                         curChunk++;
@@ -232,7 +232,7 @@ namespace torrent {
                 current_byte += files[i].second;
                 continue;
             }
-            int write_amount = min(files[i].second, end - start - chunk_offset);
+            size_t write_amount = min(files[i].second, end - start - chunk_offset);
             out.open(m_downloadLocation + files[i].first);
             // TODO: handle write errors.
             out.seekp(start - current_byte);

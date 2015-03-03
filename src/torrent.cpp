@@ -59,12 +59,12 @@ namespace torrent {
         size_t beginChunkId, endChunkId;
         beginOffset = 0;
         beginChunkId = 0;
-        for (auto tuple : fileTuples) {
-            endChunkId = ceil((tuple->second() + beginOffset)/pieceLength) + beginChunkId - 1;
-            endOffset = (tuple->second() + beginOffset) % pieceLength;
+        for (auto& tuple : fileTuples) {
+            endChunkId = ceil((tuple.second + beginOffset)/pieceLength) + beginChunkId - 1;
+            endOffset = (tuple.second + beginOffset) % pieceLength;
             endOffset = endOffset ? endOffset-1 : pieceLength-1;
-            FilePiece newFilePiece(tuple->first(), beginOffset, endOffset,
-                                   beginChunkId, endChunkId, tuple->first());
+            FilePiece newFilePiece(tuple.first, beginOffset, endOffset,
+                                   beginChunkId, endChunkId, tuple.second);
             
             size_t currentChunkId = beginChunkId;
             if (!m_chunks.empty() && m_chunks.back().getChunkId() == beginChunkId)
@@ -90,12 +90,11 @@ namespace torrent {
             }
         }
     }
-    
     // MOVE
     Torrent::Torrent(std::unordered_set<std::string>&& announceList,
                      std::string&&                     name,
                      size_t                            pieceLength,
-                     std::list<FileTuple>&&          files,
+                     std::list<FileTuple>&&            files,
                      std::vector<char>&&               pieces)
     : m_announceList(announceList)
     , m_name(name)

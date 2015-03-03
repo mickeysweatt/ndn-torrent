@@ -39,7 +39,7 @@ namespace torrent {
                     curr_tok_p =  std::make_shared<BencodeByteStringToken>(ifs);
                 }
                 else {
-                    throw new ParseError("Unrecognized type.");
+                    throw ParseError("Unrecognized type.");
                 }
             }
         }
