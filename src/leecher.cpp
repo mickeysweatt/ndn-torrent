@@ -56,6 +56,13 @@ namespace torrent {
    {
    }
 
+   Leecher::~Leecher() 
+   {
+      for (auto& it : m_pendingChunks) {
+        it.second->stop();
+      }
+   }
+
    int Leecher::download(const ChunkInfo& chunkInfo, bool block)
    {
        ChunkCallback cb(chunkInfo, *this);
@@ -95,6 +102,7 @@ namespace torrent {
        auto it = m_pendingChunks.find(&chunkInfo);
        if (m_pendingChunks.end() != it) {
            it->second->stop();
+           m_pendingChunks.erase(it->first);
            return 1;
        }
        return 0;
@@ -117,7 +125,7 @@ namespace torrent {
                                   content.data()),
                               static_cast<unsigned long>(content.size()));
         // if hashes match
-        if ( sha1 == chunkInfo.getChunkHash() ) {
+        if (sha1 == chunkInfo.getChunkHash() ) {
             Chunk chunk(chunkInfo, std::move(content));
             m_clientProtocol.chunkDownloadSuccess(chunk);
             m_pendingChunks.erase(&chunkInfo);

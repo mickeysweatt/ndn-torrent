@@ -20,8 +20,8 @@ public:
     explicit Leecher(const ndn::Name& prefix, TorrentClientProtocol& clientProtocol);
    // Creates a Leecher that communicates with clientProtocol.
 
-   ~Leecher() = default;
-   // Destroy this object.
+   ~Leecher();
+   // Destroy this object and stop all pending downloads.
 
    int download(const ChunkInfo& chunkInfo, bool block = true);
    // Begins the download for the chunk described by ChunkInfo, if not 
