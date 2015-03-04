@@ -2,6 +2,7 @@
 #define INCLUDED_LEECHER_HPP
 
 #include <torrentClientProto.hpp>
+#include <ndn-cxx/contexts/consumer-context.hpp>
 #include <list>
 #include <unordered_map>
 #include <ndn-cxx/name.hpp>
@@ -22,7 +23,7 @@ public:
    ~Leecher() = default;
    // Destroy this object.
 
-   int download(const ChunkInfo& chunkInfo);
+   int download(const ChunkInfo& chunkInfo, bool block = true);
    // Begins the download for the chunk described by ChunkInfo, if not 
    // already in the process of downloading.
 
@@ -32,13 +33,18 @@ public:
 
    int stopDownload(const std::list<ChunkInfo>& chunkInfoList);
    // Terminates the download for chunks in chunkInfoList if possible.
+    
+    int stopDownload(const ChunkInfo& chunkInfo);
+    // Terminates the download for chunks in chunkInfoList if possible.
 
-   void processDownloadedChunk(std::vector<char> content, const ChunkInfo& chunk) const;
+   void processDownloadedChunk(std::vector<char> content, 
+                               const ChunkInfo& chunk);
 
 private:
    // DATA
-   ndn::Name              m_prefix;
-   TorrentClientProtocol& m_clientProtocol;
+   ndn::Name                                              m_prefix;
+   TorrentClientProtocol&                                 m_clientProtocol;
+   std::unordered_map<const ChunkInfo *, ndn::Consumer *> m_pendingChunks;
 };
 
 } // namespace torrent
