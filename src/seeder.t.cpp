@@ -94,3 +94,8 @@ int testSeeder()
   }
   return 0;
 }
+
+int main()
+{
+  testSeeder();
+}

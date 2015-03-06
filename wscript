@@ -1,6 +1,6 @@
 ## -*- Mode: python; py-indent-offset: 4; indent-tabs-mode: nil; coding: utf-8; -*-
 
-import os
+import os, copy
 
 def options(opt):
     opt.tool_options("compiler_cxx")
@@ -39,10 +39,14 @@ def build(bld):
         else:
           impls.append(s)
     for t in tests:
-          sources = impls
+          sources =  copy.copy(impls)
           sources.append(t)
+          from waflib.Tools import waf_unit_test
+          bld.add_post_fun(waf_unit_test.summary)
+          #print sources
           bld.program(source=sources,
+                features='test',
                 includes=". src",
-                target=str(s)[:-6],
+                target=str(t)[:-6],
                 stlib=libs,
                 use=['CRYPTOPP', 'NDN-CXX'])
