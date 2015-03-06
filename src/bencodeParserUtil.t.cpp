@@ -9,12 +9,13 @@ int main()
    std::istringstream in(str);
    torrent::BencodeParserUtil::parseStream(in);
    str = "4:spam";
-   // in = std::istringstream(str);
-   torrent::BencodeParserUtil::parseStream(in);
+   std::istringstream in2(str);
+   torrent::BencodeParserUtil::parseStream(in2);
    str = "l4:spami42ee";
-   // in = std::istringstream(str);
-   torrent::BencodeParserUtil::parseStream(in);
+   std::istringstream in3(str);
+   torrent::BencodeParserUtil::parseStream(in3);
    str = "d3:bar4:spam3:fooi42ee";
-   // in = std::istringstream(str);
-   torrent::BencodeParserUtil::parseStream(in);
+   std::istringstream in4(str);
+   torrent::BencodeParserUtil::parseStream(in4);
+   return 0;
 }
