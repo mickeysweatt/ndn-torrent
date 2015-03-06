@@ -41,8 +41,6 @@ def build(bld):
     for t in tests:
           sources =  copy.copy(impls)
           sources.append(t)
-          from waflib.Tools import waf_unit_test
-          bld.add_post_fun(waf_unit_test.summary)
           #print sources
           bld.program(source=sources,
                 features='test',
@@ -50,3 +48,6 @@ def build(bld):
                 target=str(t)[:-6],
                 stlib=libs,
                 use=['CRYPTOPP', 'NDN-CXX'])
+
+    from waflib.Tools import waf_unit_test
+    bld.add_post_fun(waf_unit_test.summary)
