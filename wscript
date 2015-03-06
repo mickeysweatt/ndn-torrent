@@ -30,8 +30,19 @@ def configure(conf):
 
 def build(bld):
     libs = ['cryptopp', 'ndn-cxx', 'ssl']
-    bld.program(source=bld.path.ant_glob('src/*.cpp'),
+    tests = []
+    impls = []
+    for s in bld.path.ant_glob('src/*.cpp'):
+        ending = str(s)[-6:]
+        if ".t.cpp" == ending:
+          tests.append(s)
+        else:
+          impls.append(s)
+    for t in tests:
+          sources = impls
+          sources.append(t)
+          bld.program(source=sources,
                 includes=". src",
-                target='torrentParser',
+                target=str(s)[:-6],
                 stlib=libs,
                 use=['CRYPTOPP', 'NDN-CXX'])
