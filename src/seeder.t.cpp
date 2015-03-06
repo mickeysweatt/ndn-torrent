@@ -97,5 +97,4 @@ int testSeeder()
 
 int main()
 {
-  testSeeder();
 }

@@ -113,7 +113,8 @@ namespace torrent {
     : m_announceList(std::move(other.m_announceList)),
       m_name(std::move(other.m_name)),
       m_pieceLength(other.m_pieceLength),
-      m_chunks(std::move(other.m_chunks))
+      m_chunks(std::move(other.m_chunks)),
+      m_completeHash(std::move(other.m_completeHash))
     {
     }
 
@@ -144,6 +145,7 @@ namespace torrent {
             m_name = std::move(rhs.m_name);
             m_pieceLength = rhs.m_pieceLength;
             m_chunks = std::move(rhs.m_chunks);
+            m_completeHash = std::move(rhs.m_completeHash);
         }
         return *this;
     }

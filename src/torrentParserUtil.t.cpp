@@ -7,7 +7,7 @@
 #include <vector>
 #include <iostream>
 
-#define PREFIX "/Users/hannahjin/ndnSIM/ndn-torrent/test/"
+#define PREFIX "/Users/admin/Dropbox/ndn-torrent/test/"
 
  int main() {
      std::ifstream single(PREFIX "ubuntu-14.10-desktop-amd64.torrent",
@@ -16,6 +16,6 @@
                         std::ios::binary);
 
      std::cout << torrent::TorrentParserUtil::parseFile(single);
-     torrent::TorrentParserUtil::parseFile(many);
+     std::cout << torrent::TorrentParserUtil::parseFile(many);
      return 0;
  }
