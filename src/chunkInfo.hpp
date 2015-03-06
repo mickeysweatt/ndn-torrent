@@ -4,7 +4,6 @@
 #include <list>
 #include <sha1hash.hpp>
 #include <filePiece.hpp>
-#include <iosfwd>
 
 namespace torrent{
 
@@ -16,6 +15,9 @@ public:
 
 	ChunkInfo(size_t id, unsigned char *hash);
 	// Creates an instance with m_id and m_hash initialized
+
+  ChunkInfo(size_t id, SHA1Hash hash);
+  // Creates an instance with m_id and m_hash initialized
 
 	~ChunkInfo();
 	// Destroys this object
@@ -31,9 +33,7 @@ public:
     void addFilePiece(const FilePiece& fp);
     
     void setChunkId(size_t id);
-    
-    // FREIENDS
-    friend std::ostream& operator<<(std::ostream& s, const ChunkInfo& c);
+
 private:
 	SHA1Hash m_hash;
 	std::list<FilePiece> m_file_pieces;
