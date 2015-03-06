@@ -155,7 +155,7 @@ int testSeeder2()
 
 int main()
 {
-  testSeeder1();
+  return testSeeder1();
   // Currently fails, needs to be debugged
   // testSeeder2();
 }

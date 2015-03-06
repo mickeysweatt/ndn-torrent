@@ -1,4 +1,5 @@
 #include <iostream>
+#include <sys/wait.h>
 #include <unistd.h>
 
 #include <sha1hash.hpp>
@@ -70,7 +71,7 @@ int testFileTransfer()
    if (0 != (child = fork())) {
        torrent::Seeder seeder(testClientProtocol, prefix);
        seeder.upload(chunk);
-       sleep(5);
+       sleep(15);
        int rval;
        waitpid(child, &rval, 0);
        return rval;
