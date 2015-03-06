@@ -6,6 +6,7 @@
 #include <vector>
 #include <string>
 #include <chunkInfo.hpp>
+#include <iosfwd>
 
 namespace torrent {
 
@@ -62,15 +63,14 @@ class Torrent {
     const std::list<ChunkInfo>& getChunks() const;
     // Return a list of all the chunks in this torrent.
     
-    // TODO: if the vector sticks around, change to const vector<...>&
-    std::vector<FileTuple> getFileTuples() const;
-    // Return a vector of File names and their lengths.
-    
     // MANIPULATORS
     Torrent& operator=(Torrent&& rhs);
         // Assign the value of the specified 'rhs' object to this value.
     
     Torrent& operator=(const Torrent& rhs) = default;
+    
+    // HELPER
+    friend std::ostream& operator<<(std::ostream& s, const Torrent& t);
   
   private:
     // DATA
@@ -78,6 +78,8 @@ class Torrent {
     std::string             m_name;
     size_t                  m_pieceLength;
     std::list<ChunkInfo>    m_chunks;
+    std::vector<char>       m_completeHash;
+    
 };
 
 }

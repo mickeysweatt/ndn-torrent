@@ -15,6 +15,7 @@
      std::ifstream many(PREFIX "groks113_archive.torrent",
                         std::ios::binary);
 
-     torrent::TorrentParserUtil::parseFile(single);
+     std::cout << torrent::TorrentParserUtil::parseFile(single);
      torrent::TorrentParserUtil::parseFile(many);
+     return 0;
  }

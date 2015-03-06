@@ -3,6 +3,8 @@
 #include <filePiece.hpp>
 #include <sha1hash.hpp>
 
+#include <iostream>
+
 namespace torrent{
 
     ChunkInfo::ChunkInfo()
@@ -27,5 +29,10 @@ namespace torrent{
     {
         m_id = id;
     }
-
+    
+    std::ostream& operator<<(std::ostream& s, const ChunkInfo& c)
+    {
+        s << "id: " << c.m_id ;
+        return s;
+    }
 }

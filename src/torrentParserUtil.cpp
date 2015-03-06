@@ -122,7 +122,7 @@ namespace torrent {
                  dynamic_pointer_cast<const BencodeIntegerToken >(
                                                infoDict.find("length")->second);
         assert(nullptr != fileLengthToken);
-        pieceLength = fileLengthToken->getValue();
+        fileLength = fileLengthToken->getValue();
     }
 
     static 

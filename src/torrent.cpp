@@ -4,8 +4,10 @@
 #include <cmath>
 #include <cstring>
 #include <iostream>
+#include <cassert>
 
 namespace torrent {
+    using std::endl;
     const int HASHLEN = 20;
     
 	// Single File
@@ -17,6 +19,7 @@ namespace torrent {
      : m_announceList(announceList)
      , m_name(name)
      , m_pieceLength(pieceLength)
+     , m_completeHash(pieces)
      {
          size_t endOffset, endChunkId;
          endChunkId = ceil(fileLength/pieceLength) - 1;
@@ -29,7 +32,7 @@ namespace torrent {
          while (currentChunkId <= endChunkId)
          {
              unsigned char hash[HASHLEN];
-             if (HASHLEN*(currentChunkId+1) <= sizeof(pieces))
+             if (HASHLEN*(currentChunkId+1) <= pieces.size())
              {
                  memcpy(hash, &(pieces[HASHLEN*currentChunkId]), HASHLEN*sizeof(char));
              }
@@ -41,6 +44,7 @@ namespace torrent {
              ChunkInfo newChunkInfo(currentChunkId, hash);
              newChunkInfo.addFilePiece(newFilePiece);
              m_chunks.push_back(newChunkInfo);
+             currentChunkId++;
          }
      }
     
@@ -48,11 +52,12 @@ namespace torrent {
     Torrent::Torrent(const std::unordered_set<std::string>& announceList,
                      std::string&                           name,
                      size_t                                 pieceLength,
-                     const std::list<FileTuple>&          fileTuples,
+                     const std::list<FileTuple>&            fileTuples,
                      const std::vector<char>&               pieces)
     : m_announceList(announceList)
     , m_name(name)
     , m_pieceLength(pieceLength)
+    , m_completeHash(pieces)
     {
         // TODO
         size_t beginOffset, endOffset;
@@ -99,8 +104,9 @@ namespace torrent {
     : m_announceList(announceList)
     , m_name(name)
     , m_pieceLength(pieceLength)
+    , m_completeHash(pieces)
     {
-        // TODO
+        //TODO
     }
     
     Torrent::Torrent(Torrent&& other)
@@ -130,13 +136,6 @@ namespace torrent {
     {
         return m_chunks;
     }
-    
-    // TODO: if the vector sticks around, change to const vector<...>&
-    std::vector<Torrent::FileTuple> Torrent::getFileTuples() const
-    {
-        //TODO: a real implementation.
-        return std::vector<Torrent::FileTuple>();
-    }
 
     Torrent& Torrent::operator=(Torrent&& rhs)
     {
@@ -147,5 +146,19 @@ namespace torrent {
             m_chunks = std::move(rhs.m_chunks);
         }
         return *this;
+    }
+    
+    std::ostream& operator<<(std::ostream& s, const Torrent& t)
+    {
+        s << "Torrent name: " << t.m_name << endl
+          << "Piece length: " << t.m_pieceLength << endl;
+        auto it = t.m_completeHash.data();
+        for (auto chunkInfo : t.m_chunks)
+        {
+            assert(0 == memcmp(chunkInfo.getChunkHash().getHash(), it, 20));
+            it += 20;
+        }
+        
+        return s;
     }
 }
