@@ -1,4 +1,5 @@
 #include <iostream>
+#include <unistd.h>
 
 #include <sha1hash.hpp>
 #include <torrentClient.hpp>
@@ -65,21 +66,28 @@ int testFileTransfer()
    TestClientProtocol testClientProtocol;
    /// TODO: The asymmetry bothers me, we should change one of the constructor's
    /// parameter orders
-   torrent::Leecher leecher(prefix2, testClientProtocol);
-   torrent::Seeder seeder(testClientProtocol, prefix);
-
-   seeder.upload(chunk);
-   leecher.download(metadata);
-
-   if (testClientProtocol.getStatus() == 1)
-   {
-      std::cout << "File transfer test succeeded" << std::endl;
-      return 0;
+    pid_t child;
+   if (0 != (child = fork())) {
+       torrent::Seeder seeder(testClientProtocol, prefix);
+       seeder.upload(chunk);
+       sleep(5);
+       int rval;
+       waitpid(child, &rval, 0);
+       return rval;
    }
-   else
-   {
-      std::cout << "File transfer test failure" << std::endl;
-      return 1;
+   else {
+       torrent::Leecher leecher(prefix2, testClientProtocol);
+       leecher.download(metadata);
+       if (testClientProtocol.getStatus() == 1)
+       {
+           std::cout << "File transfer test succeeded" << std::endl;
+           return 0;
+       }
+       else
+       {
+           std::cout << "File transfer test failure" << std::endl;
+           return 1;
+       }
    }
 }
 
