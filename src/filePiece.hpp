@@ -18,13 +18,13 @@ class FilePiece
   	~FilePiece();
 
   	// ACCESSORS
-  	std::string getFilePieceName();
+  	std::string getFilePieceName() const;
 
-  	size_t getFilePieceLen();
+  	size_t getFilePieceLen() const;
 
-  	std::pair<size_t, size_t> getFilePieceOffsets();
+  	std::pair<size_t, size_t> getFilePieceOffsets() const;
     
-    std::pair<size_t, size_t> getFilePieceChunkRange();
+    std::pair<size_t, size_t> getFilePieceChunkRange() const;
 
   private:
   	std::string m_name;
@@ -36,13 +36,13 @@ class FilePiece
 };
 
     // INLINE ACCESSORS
-    inline std::string FilePiece::getFilePieceName() { return m_name; }
-    inline size_t FilePiece::getFilePieceLen() { return m_length; }
-    inline std::pair<size_t, size_t> FilePiece::getFilePieceOffsets() 
+    inline std::string FilePiece::getFilePieceName() const { return m_name; }
+    inline size_t FilePiece::getFilePieceLen() const { return m_length; }
+    inline std::pair<size_t, size_t> FilePiece::getFilePieceOffsets()  const
     { 
         return std::make_pair(m_start, m_end); 
     }
-    inline std::pair<size_t, size_t> FilePiece::getFilePieceChunkRange()
+    inline std::pair<size_t, size_t> FilePiece::getFilePieceChunkRange() const
     {
         return std::make_pair(m_firstChunkId, m_lastChunkId);
     }
