@@ -34,7 +34,7 @@ def build(bld):
     impls = []
     for s in bld.path.ant_glob('src/*.cpp'):
         ending = str(s)[-6:]
-        if ".t.cpp" == ending:
+        if ".t.cpp" == ending or str(s) == "userInterface.cpp":
           tests.append(s)
         else:
           impls.append(s)
@@ -43,11 +43,13 @@ def build(bld):
           sources.append(t)
           #print sources
           bld.program(source=sources,
-                features='test',
+                #features='test',
                 includes=". src",
-                target=str(t)[:-6],
+                target=str(t)[:-4] \
+                    if str(t)[-4:] == ".cpp" \
+                    else str(t)[:-6],
                 stlib=libs,
                 use=['CRYPTOPP', 'NDN-CXX'])
 
-    from waflib.Tools import waf_unit_test
-    bld.add_post_fun(waf_unit_test.summary)
+    #from waflib.Tools import waf_unit_test
+    #bld.add_post_fun(waf_unit_test.summary)

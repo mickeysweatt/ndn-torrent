@@ -93,11 +93,9 @@ namespace torrent {
             }
             // If we did not successfully read the entire chunk,
             // then don't try to compute the checksums.
-            if (skip_chunk)
-                continue;
             
-            // Now that we have read in the chunk, compare the checksum.
-            if (chunk.getChunkHash() == SHA1Hash(
+            // Otherwise, compare the checksum.
+            if (!skip_chunk && chunk.getChunkHash() == SHA1Hash(
                     reinterpret_cast<unsigned char*>(readBuffer), chunk_offset)) {
                 m_uploadList.push_back(
                 Chunk(chunk, vector<char>(readBuffer, readBuffer + chunk_offset)));
