@@ -45,9 +45,9 @@ def build(bld):
           bld.program(source=sources,
                 #features='test',
                 includes=". src",
-                target=str(t)[:-4] \
-                    if str(t)[-4:] == ".cpp" \
-                    else str(t)[:-6],
+                target=str(t)[:-6] \
+                    if str(t)[-6:] == ".t.cpp" \
+                    else str(t)[:-4],
                 stlib=libs,
                 use=['CRYPTOPP', 'NDN-CXX'])
 
