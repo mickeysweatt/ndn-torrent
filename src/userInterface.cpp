@@ -6,10 +6,10 @@ using namespace std;
 
 int main(int argn, char *argv[]) {
     //TODO: process command line arguments.
-    cout << "Enter torrent file name: ";
-    string filename;
-    cin >> filename;
-    cout << "Will use torrent file " << filename << endl;
+//    cout << "Enter torrent file name: ";
+    string filename = "/Users/admin/Dropbox/ndn-torrent/test/groks113_archive.torrent";
+//    cin >> filename;
+//    cout << "Will use torrent file " << filename << endl;
     cout << "Enter download location: ";
     string downloadLocation;
     cin >> downloadLocation;

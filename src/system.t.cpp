@@ -7,12 +7,6 @@
 
 int testClient()
 {
-   torrent::TorrentClient testSeeder("/test/helloworld.torrent",
-                                     "/test/seeder/");
-   
-   torrent::TorrentClient testLeecher("/test/helloworld.torrent",
-                                      "/test/leecher/");
-
    return 0;
 }
 
@@ -29,10 +23,7 @@ int testFileTransfer()
    torrent::ChunkInfo metadata(0, bufferHash);
    torrent::Chunk chunk(metadata, buffer);
 
-   /// TODO: Asymmetry in how leecher and seeder handle prefixes, should
-   /// standardize
-   std::string prefix = "/torrent/helloworld.torrent/";
-   std::string prefix2 = "/torrent/helloworld.torrent";
+   ndn::Name prefix("/torrent/helloworld/");
 
    class TestClientProtocol : public torrent::TorrentClientProtocol
    {
@@ -65,30 +56,28 @@ int testFileTransfer()
    };
 
    TestClientProtocol testClientProtocol;
-   /// TODO: The asymmetry bothers me, we should change one of the constructor's
-   /// parameter orders
-    pid_t child;
+
+   pid_t child;
    if (0 != (child = fork())) {
-       torrent::Seeder seeder(testClientProtocol, prefix);
-       seeder.upload(chunk);
-       sleep(15);
-       int rval;
-       waitpid(child, &rval, 0);
-       return rval;
+      torrent::Seeder seeder(prefix, testClientProtocol);
+      seeder.upload(chunk);
+      int rval;
+      waitpid(child, &rval, 0);
+      return rval;
    }
    else {
-       torrent::Leecher leecher(prefix2, testClientProtocol);
-       leecher.download(metadata);
-       if (testClientProtocol.getStatus() == 1)
-       {
-           std::cout << "File transfer test succeeded" << std::endl;
-           return 0;
-       }
-       else
-       {
-           std::cout << "File transfer test failure" << std::endl;
-           return 1;
-       }
+      torrent::Leecher leecher(prefix, testClientProtocol);
+      leecher.download(metadata);
+      if (testClientProtocol.getStatus() == 1)
+      {
+         std::cout << "File transfer test succeeded" << std::endl;
+         exit(0);
+      }
+      else
+      {
+         std::cout << "File transfer test failure" << std::endl;
+         exit(1);
+      }
    }
 }
 

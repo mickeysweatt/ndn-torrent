@@ -117,28 +117,6 @@ Seeder::SeederError Seeder::stopUploading(const Chunk& chunk)
    return stopUploading(chunk.getMetadata());
 }
 
-void Seeder::onInterest(ndn::Producer& producer, const ndn::Interest& interest)
-{
-   // onCacheMiss seems to need this function to work properly, even if it does
-   // nothing
-    std::cout << "IN ON INTEREST:" << interest.toUri() << std::endl;
-   return;
-}
 
-void Seeder::onCacheMiss(ndn::Producer& producer, const ndn::Interest& interest)
-{
-   const ndn::Name name = interest.getName();
-   size_t lastComponentIndex = name.size() - 1;
-   size_t id = atoi(name.get(lastComponentIndex).toUri().c_str());
-   std::cout << "IN ON CACHE MISS" << interest.toUri() << std::endl;
-   // Drop interest if we don't have a suitable producer
-   if (!m_chunks.count(id))
-      return;
-            
-   const std::vector<char>& buffer = m_chunks[id].getBuffer();
-   // std::unique_ptr<ndn::Producer>& producer = m_producers[id];
-
-   producer.produce(ndn::Name(), reinterpret_cast<const uint8_t*>(buffer.data()), buffer.size());
-}
 
 }

@@ -47,8 +47,8 @@ namespace torrent {
         
         // Now that we have parsed the file, we can get the real name of
         // the torrent.
-        m_seeder = new Seeder(*this, "ndn:/torrent/" + m_downloadLocation + "/");
-        m_leecher = new Leecher(ndn::Name("ndn:/torrent/" + m_downloadLocation), *this);
+        m_seeder = new Seeder(*this, "ndn:/torrent/" + m_torrent.getName() + "/");
+        m_leecher = new Leecher(ndn::Name("ndn:/torrent/" + m_torrent.getName()), *this);
         m_downloadLocation += "/";
     }
     
