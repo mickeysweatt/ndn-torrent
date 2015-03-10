@@ -39,10 +39,12 @@ namespace torrent {
             m_downloadLocation += "/";
         }
         // Now, add a directory to put the download in.
-        m_downloadLocation += m_torrent.getName();
+        m_downloadLocation += m_torrent.getName() + "/";
         // Check that this download location exists: if not, create it.
         if (!boost::filesystem::exists(m_downloadLocation)) {
-            boost::filesystem::create_directories(m_downloadLocation);
+            boost::filesystem::path path(m_downloadLocation);
+            boost::filesystem::create_directories(
+                boost::filesystem::absolute(path));
         }
         
         // Now that we have parsed the file, we can get the real name of
@@ -50,6 +52,9 @@ namespace torrent {
         m_seeder = new Seeder(*this, "ndn:/torrent/" + m_torrent.getName() + "/");
         m_leecher = new Leecher(ndn::Name("ndn:/torrent/" + m_torrent.getName()), *this);
         m_downloadLocation += "/";
+
+        cout << "Announcing/downloading from prefix\n"
+             << "ndn:/torrent/" << m_torrent.getName() << "/";
     }
     
     TorrentClient::~TorrentClient()
@@ -107,7 +112,7 @@ namespace torrent {
                 }
                 
                 // Read in the appropriate amount from this file.
-                int read_amount =
+                size_t read_amount =
                     min(m_torrent.getPieceLength() - chunk_offset,
                         file.getFilePieceLen());
                 in.read(readBuffer + chunk_offset, read_amount);
@@ -182,7 +187,6 @@ namespace torrent {
         //TODO: intellegent behavior based on the error.
         
         // Attempt to download the chunk again.
-// REVIEW: Since this is so common, we should add API support for single chunk
         m_leecher->download(list<ChunkInfo>(1, chunkMetadata));
     }
     void TorrentClient::chunkDownloadSuccess(const Chunk& chunk)
@@ -213,7 +217,6 @@ namespace torrent {
         }
         // TODO: this breaks the order of the list.  Do we care?
         m_uploadList.push_back(chunk);
-// REVIEW: HERE TOO
         m_seeder->upload(list<Chunk>(1, chunk));
     }
 }
