@@ -7,6 +7,7 @@
 #include <vector>
 #include <utility>
 #include <sha1hash.hpp>
+#include <boost/filesystem.hpp>
 
 using namespace std;
 
@@ -16,8 +17,10 @@ namespace torrent {
     //Parse the torrent file, but don't do anything else.
     TorrentClient::TorrentClient(const string& torrentFile,
                                  const string& downloadLocation)
-    : m_downloadLocation(downloadLocation), m_seeder(*this),
-    m_leecher(ndn::Name("ndn:/torrent"), *this), m_uploading(false)
+    : m_downloadLocation(downloadLocation),
+    m_seeder(nullptr),
+    m_leecher(nullptr),
+    m_uploading(false)
     {
         ifstream in(torrentFile);
         if (!in) {
@@ -30,6 +33,33 @@ namespace torrent {
             throw BadTorrentFile(torrentFile + " has a bad format.");
         }
         in.close();
+        
+        // Add a trailing slash to the download location if it is missing.
+        if (m_downloadLocation.back() != '/') {
+            m_downloadLocation += "/";
+        }
+        // Now, add a directory to put the download in.
+        m_downloadLocation += m_torrent.getName();
+        // Check that this download location exists: if not, create it.
+        if (!boost::filesystem::exists(m_downloadLocation)) {
+            boost::filesystem::create_directories(m_downloadLocation);
+        }
+        
+        // Now that we have parsed the file, we can get the real name of
+        // the torrent.
+        m_seeder = new Seeder(*this, "ndn:/torrent/" + m_downloadLocation + "/");
+        m_leecher = new Leecher(ndn::Name("ndn:/torrent/" + m_downloadLocation), *this);
+        m_downloadLocation += "/";
+    }
+    
+    TorrentClient::~TorrentClient()
+    {
+        if (m_seeder != nullptr) {
+            delete m_seeder;
+        }
+        if (m_leecher != nullptr) {
+            delete m_leecher;
+        }
     }
     
     // Assumption: the torrent file list is in chunk order.
@@ -115,12 +145,12 @@ namespace torrent {
         // to upload.  Tell the seeders/leechers to start downloading.
         
         if (m_uploadList.size() > 0) {
-            if ((errVal = m_seeder.upload(m_uploadList)) != 0)
+            if ((errVal = m_seeder->upload(m_uploadList)) != 0)
                 return errVal;
             m_uploading = true;
         }
         if (m_downloadList.size() > 0) {
-            if ((errVal = m_leecher.download(m_downloadList)) != 0)
+            if ((errVal = m_leecher->download(m_downloadList)) != 0)
                 return errVal;
                 // TODO: more reasonable behavior depending on return type.
         }
@@ -133,14 +163,13 @@ namespace torrent {
         if (!m_uploading)
             return 0;
         int errVal;
-        if ((errVal = m_leecher.stopDownload(m_downloadList)) != 0)
+        if ((errVal = m_leecher->stopDownload(m_downloadList)) != 0)
             return errVal;
         list<ChunkInfo> uploadMetadata;
         for (Chunk& c : m_uploadList) {
             uploadMetadata.push_back(c.getMetadata());
         }
-        //if ((errVal = m_seeder.stopUploading(m_uploadList)) != 0)
-        if ((errVal = m_seeder.stopUploading(uploadMetadata)) != 0)
+        if ((errVal = m_seeder->stopUploading(uploadMetadata)) != 0)
             return errVal;
         
         m_uploading = false;
@@ -154,7 +183,7 @@ namespace torrent {
         
         // Attempt to download the chunk again.
 // REVIEW: Since this is so common, we should add API support for single chunk
-        m_leecher.download(list<ChunkInfo>(1, chunkMetadata));
+        m_leecher->download(list<ChunkInfo>(1, chunkMetadata));
     }
     void TorrentClient::chunkDownloadSuccess(const Chunk& chunk)
     {
@@ -185,7 +214,7 @@ namespace torrent {
         // TODO: this breaks the order of the list.  Do we care?
         m_uploadList.push_back(chunk);
 // REVIEW: HERE TOO
-        m_seeder.upload(list<Chunk>(1, chunk));
+        m_seeder->upload(list<Chunk>(1, chunk));
     }
 }
 

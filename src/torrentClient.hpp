@@ -18,6 +18,7 @@ class TorrentClient : public TorrentClientProtocol {
     //CREATORS
     TorrentClient(const std::string& torrentFile,
             const std::string& downloadLocation);
+    ~TorrentClient();
     
     //METHODS
     // Override TorrentClientProtocol method
@@ -56,8 +57,8 @@ class TorrentClient : public TorrentClientProtocol {
     Torrent m_torrent;
     std::list<Chunk> m_uploadList;
     std::list<ChunkInfo> m_downloadList;
-    Seeder m_seeder;
-    Leecher m_leecher;
+    Seeder* m_seeder;
+    Leecher* m_leecher;
     bool m_uploading;
 };
 
