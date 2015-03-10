@@ -49,7 +49,7 @@ namespace torrent {
         // the torrent.
         cout << "Announcing/downloading from prefix\n"
              << "ndn:/torrent/" << m_torrent.getName() << "/";
-        m_seeder = new Seeder(*this, "ndn:/torrent/" + m_torrent.getName() + "/");
+        m_seeder = new Seeder(ndn::Name("ndn:/torrent/" + m_torrent.getName()), *this);
         m_leecher = new Leecher(ndn::Name("ndn:/torrent/" + m_torrent.getName()), *this);
     }
     
