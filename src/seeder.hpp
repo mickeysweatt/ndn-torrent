@@ -19,6 +19,22 @@ class Seeder {
    // A class that repesents the seeding, i.e. uploading, portion of the client.
    // It will respond to interest packets for chunks that it can upload.
    // This class is non-copyable.
+private:
+   class SeederCallback
+   // A class that handles callbacks for the producer. In particular, it will
+   // handle interests that come in for the file that is being seeded.
+   {
+   public:
+      SeederCallback(Seeder& seeder);
+      // Creates a SeederCallback instance.
+
+      void onCacheMiss(ndn::Producer& producer, const ndn::Interest& interest);
+      // Handles callbacks for when an interest arrives but the data is not
+      // cached in the network.
+   private:
+      Seeder& m_seeder;
+   };
+
 public:
    // ERROR CODES
    enum SeederError
@@ -30,8 +46,8 @@ public:
    explicit Seeder(TorrentClientProtocol& clientProtocol);
    // DEPRECATED, use two-arg constructor instead
 
-   Seeder(TorrentClientProtocol& clientProtocol,
-          const std::string&     prefix);
+   Seeder(const ndn::Name& prefix,
+          TorrentClientProtocol& clientProtocol);
    // PRECONDITION: prefix is a valid prefix that ends with a '/'
    // Create a Seeder that communicates with clientProtocol, and seeds using the
    // given prefix.
@@ -40,13 +56,13 @@ public:
    Seeder& operator=(const Seeder& other) = delete;
    // Seeder is non-copyable
 
-   Seeder(Seeder&& other);
+//   Seeder(Seeder&& other);
    // Move constructor to move a Seeder.
 
-   Seeder& operator=(Seeder&& other);
+//   Seeder& operator=(Seeder&& other);
    // Move assignment to move a Seeder.
 
-   ~Seeder() = default;
+   ~Seeder();
    // Destroy this object.
 
    SeederError upload(const std::list<Chunk>& chunkDataList);
@@ -86,52 +102,15 @@ public:
    // for this chunk.
 private:
    // DATA
+   ndn::Name m_prefix;
    TorrentClientProtocol& m_clientProtocol;
-
-   std::unordered_map<size_t, std::unique_ptr<ndn::Producer>> m_producers;
+   //std::unordered_map<size_t, std::unique_ptr<ndn::Producer>> m_producers;
+   ndn::Producer m_producer;
    std::unordered_map<size_t, Chunk> m_chunks;
-   std::string m_prefix;
-
-   // PRIVATE FUNCTIONS
-   void onInterest(ndn::Producer& producer, const ndn::Interest& interest);
-   void onCacheMiss(ndn::Producer& producer, const ndn::Interest& interest);
+   SeederCallback *m_callback;
 };
-
-//==============================================================================
-//                       INLINE FUNCTION DEFINTIONS
-//==============================================================================
-
-// DEPRECATED, use two-arg constructor instead
-inline Seeder::Seeder(TorrentClientProtocol& clientProtocol)
-   : m_clientProtocol(clientProtocol)
-{
-   m_prefix = "/torrent/file/";
-}
-
-inline Seeder::Seeder(TorrentClientProtocol& clientProtocol,
-                      const std::string&     prefix)
-   : m_clientProtocol(clientProtocol), m_prefix(prefix)
-{
-}
-
-inline Seeder::Seeder(Seeder&& other)
-   : m_clientProtocol(other.m_clientProtocol),
-     m_producers(std::move(other.m_producers)),
-     m_chunks(std::move(other.m_chunks)),
-     m_prefix(std::move(other.m_prefix))
-{
-}
-
-inline Seeder& Seeder::operator=(Seeder&& other)
-{
-   m_clientProtocol = other.m_clientProtocol;
-   m_producers = std::move(other.m_producers);
-   m_chunks = std::move(other.m_chunks);
-   m_prefix = std::move(other.m_prefix);
-
-   return *this;
-}
 
 } // namespace torrent
 
 #endif // INCLUDED_SEEDER_HPP
+        

@@ -78,7 +78,11 @@ namespace torrent {
        std::ostringstream ostr;
        ostr << m_prefix << "/" << chunkInfo.getChunkId();
        std::cout << "CONSUMING: " << ostr.str() << std::endl;
-       ndn::Name suffix = ndn::Name(ostr.str());
+
+       // ndn::Name suffix = ndn::Name(ostr.str());
+       std::ostringstream suffixOstr;
+       suffixOstr << chunkInfo.getChunkId();
+       ndn::Name suffix = ndn::Name(suffixOstr.str());
        m_consumer.asyncConsume(suffix);
 
        m_pendingChunks.insert(std::make_pair(suffix, &chunkInfo));
