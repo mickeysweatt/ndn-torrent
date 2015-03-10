@@ -121,6 +121,7 @@ void Seeder::onInterest(ndn::Producer& producer, const ndn::Interest& interest)
 {
    // onCacheMiss seems to need this function to work properly, even if it does
    // nothing
+    std::cout << "IN ON INTEREST:" << interest.toUri() << std::endl;
    return;
 }
 
@@ -129,7 +130,7 @@ void Seeder::onCacheMiss(ndn::Producer& producer, const ndn::Interest& interest)
    const ndn::Name name = interest.getName();
    size_t lastComponentIndex = name.size() - 1;
    size_t id = atoi(name.get(lastComponentIndex).toUri().c_str());
-
+   std::cout << "IN ON CACHE MISS" << interest.toUri() << std::endl;
    // Drop interest if we don't have a suitable producer
    if (!m_chunks.count(id))
       return;
