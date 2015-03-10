@@ -42,7 +42,7 @@ class Torrent {
     Torrent(const std::unordered_set<std::string>& announceList,
             std::string&                     name,
             size_t                           pieceLength,
-            const std::list<FileTuple>&    fileTuples,
+            const std::list<FileTuple>&      fileTuples,
             const std::vector<char>&         pieces);
     
     Torrent(Torrent&& other);
@@ -71,6 +71,7 @@ class Torrent {
     
     // HELPER
     friend std::ostream& operator<<(std::ostream& s, const Torrent& t);
+    friend bool fileOffsetsTester(const std::list<FileTuple>& fileTuples, const size_t&                            pieceLength, const Torrent& t);
   
   private:
     // DATA

@@ -73,7 +73,7 @@ void dataEnterContext(ndn::Consumer& consumer, const ndn::Data &data)
 int testSeeder1()
 {
   DummyTorrentClientProtocol dummyProtocol;
-  Seeder seeder(dummyProtocol, "/torrent/dummyFile/");
+  Seeder seeder(ndn::Name("/torrent/dummyFile"), dummyProtocol);
   std::list<Chunk> chunks;
   unsigned char dummyHash[20];
   for (size_t i = 0; i < N_PACKETS; i++)
@@ -115,7 +115,7 @@ int testSeeder1()
 int testSeeder2()
 {
   DummyTorrentClientProtocol dummyProtocol;
-  Seeder seeder(dummyProtocol, "/torrent/dummyFile2/");
+  Seeder seeder(ndn::Name("/torrent/dummyFile2"), dummyProtocol);
   std::list<Chunk> chunks;
   unsigned char dummyHash[20];
   for (size_t i = 0; i < N_PACKETS; i++)
@@ -134,7 +134,7 @@ int testSeeder2()
 
   for (size_t i = 0; i < N_PACKETS; i++)
   {
-    std::string chunkName = "/torrent/dummyFile2/";
+    std::string chunkName = "/torrent/dummyFile2";
     chunkName += std::to_string(i);
     ndn::Consumer consumer(ndn::Name(chunkName.c_str()), SDR);
     consumer.setContextOption(MUST_BE_FRESH_S, true);
@@ -155,7 +155,7 @@ int testSeeder2()
 
 int main()
 {
-  return testSeeder1();
+  testSeeder1();
   // Currently fails, needs to be debugged
-  // testSeeder2();
+  testSeeder2();
 }
