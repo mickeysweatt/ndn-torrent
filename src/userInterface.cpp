@@ -3,14 +3,16 @@
 
 using namespace std;
 
-int main2(int argn, char *argv[]) {
+int main(int argn, char *argv[]) {
     //TODO: process command line arguments.
-    cout << "Enter filename:\t";
+    cout << "Enter torrent file name: ";
     string filename;
     cin >> filename;
-    cout << "Enter download location:\t";
+    cout << "Will use torrent file " << filename << endl;
+    cout << "Enter download location: ";
     string downloadLocation;
     cin >> downloadLocation;
+    cout << "Using " << downloadLocation << " as the download directory.\n";
     torrent::TorrentClient c(filename, downloadLocation);
     return c.start();
 }

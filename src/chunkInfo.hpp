@@ -16,6 +16,9 @@ public:
 	ChunkInfo(size_t id, unsigned char *hash);
 	// Creates an instance with m_id and m_hash initialized
 
+  ChunkInfo(size_t id, SHA1Hash hash);
+  // Creates an instance with m_id and m_hash initialized
+
 	~ChunkInfo();
 	// Destroys this object
 

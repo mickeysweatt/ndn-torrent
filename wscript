@@ -1,6 +1,6 @@
 ## -*- Mode: python; py-indent-offset: 4; indent-tabs-mode: nil; coding: utf-8; -*-
 
-import os
+import os, copy
 
 def options(opt):
     opt.tool_options("compiler_cxx")
@@ -30,8 +30,26 @@ def configure(conf):
 
 def build(bld):
     libs = ['cryptopp', 'ndn-cxx', 'ssl']
-    bld.program(source=bld.path.ant_glob('src/*.cpp'),
+    tests = []
+    impls = []
+    for s in bld.path.ant_glob('src/*.cpp'):
+        ending = str(s)[-6:]
+        if ".t.cpp" == ending or str(s) == "userInterface.cpp":
+          tests.append(s)
+        else:
+          impls.append(s)
+    for t in tests:
+          sources =  copy.copy(impls)
+          sources.append(t)
+          #print sources
+          bld.program(source=sources,
+                #features='test',
                 includes=". src",
-                target='torrentParser',
+                target=str(t)[:-4] \
+                    if str(t)[-4:] == ".cpp" \
+                    else str(t)[:-6],
                 stlib=libs,
                 use=['CRYPTOPP', 'NDN-CXX'])
+
+    #from waflib.Tools import waf_unit_test
+    #bld.add_post_fun(waf_unit_test.summary)

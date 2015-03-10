@@ -8,6 +8,7 @@
 #include <sstream>
 #include <unordered_map>
 #include <cassert>
+#include <iostream>
 
 using std::vector;
 using std::string;
@@ -66,7 +67,12 @@ namespace torrent {
    int Leecher::download(const ChunkInfo& chunkInfo, bool block)
    {
        ChunkCallback cb(chunkInfo, *this);
-       ndn::Consumer c(m_prefix, RDR);
+       std::ostringstream ostr;
+       ostr << m_prefix << "/" << chunkInfo.getChunkId();
+       ndn::Consumer c(ostr.str(), RDR);
+
+       // ndn::Consumer c(m_prefix, RDR);
+
        // use API to request chunk with id in ChunkInfo
        c.setContextOption(MUST_BE_FRESH_S, false);
        c.setContextOption(CONTENT_RETRIEVED,
@@ -76,9 +82,11 @@ namespace torrent {
                                  _1, 
                                  _2, 
                                  _3)));
-       std::ostringstream ostr; //output string stream
-       ostr << m_prefix << "/" << chunkInfo.getChunkId();
-       c.asyncConsume(ndn::Name(ostr.str()));
+       // std::ostringstream ostr; //output string stream
+       // ostr << m_prefix << "/" << chunkInfo.getChunkId();
+       // c.asyncConsume(ndn::Name(ostr.str()));
+       c.asyncConsume(ndn::Name());
+
        m_pendingChunks.insert(std::make_pair(&chunkInfo, &c));
        // Returning immediately, means we must make sure that this object
        // remains in scope.
@@ -124,6 +132,7 @@ namespace torrent {
        torrent::SHA1Hash sha1(reinterpret_cast<const unsigned char *>(
                                   content.data()),
                               static_cast<unsigned long>(content.size()));
+
         // if hashes match
         if (sha1 == chunkInfo.getChunkHash() ) {
             Chunk chunk(chunkInfo, std::move(content));

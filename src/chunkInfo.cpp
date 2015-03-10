@@ -18,6 +18,11 @@ namespace torrent{
     {
     }
 
+    ChunkInfo::ChunkInfo(size_t id, SHA1Hash hash)
+    : m_id(id), m_hash(hash)
+    {
+    }
+
     void ChunkInfo::addFilePiece(const FilePiece& fp)
     {
         m_file_pieces.push_back(fp);

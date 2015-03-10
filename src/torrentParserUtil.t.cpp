@@ -16,6 +16,6 @@
                         std::ios::binary);
 
      std::cout << torrent::TorrentParserUtil::parseFile(single);
-     torrent::TorrentParserUtil::parseFile(many);
+     std::cout << torrent::TorrentParserUtil::parseFile(many);
      return 0;
  }
