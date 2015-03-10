@@ -49,12 +49,10 @@ namespace torrent {
         
         // Now that we have parsed the file, we can get the real name of
         // the torrent.
-        m_seeder = new Seeder(*this, "ndn:/torrent/" + m_torrent.getName() + "/");
-        m_leecher = new Leecher(ndn::Name("ndn:/torrent/" + m_torrent.getName()), *this);
-        m_downloadLocation += "/";
-
         cout << "Announcing/downloading from prefix\n"
              << "ndn:/torrent/" << m_torrent.getName() << "/";
+        m_seeder = new Seeder(ndn::Name("ndn:/torrent/" + m_torrent.getName()), *this);
+        m_leecher = new Leecher(ndn::Name("ndn:/torrent/" + m_torrent.getName()), *this);
     }
     
     TorrentClient::~TorrentClient()
@@ -112,7 +110,7 @@ namespace torrent {
                 }
                 
                 // Read in the appropriate amount from this file.
-                size_t read_amount =
+                int read_amount =
                     min(m_torrent.getPieceLength() - chunk_offset,
                         file.getFilePieceLen());
                 in.read(readBuffer + chunk_offset, read_amount);
@@ -187,6 +185,7 @@ namespace torrent {
         //TODO: intellegent behavior based on the error.
         
         // Attempt to download the chunk again.
+// REVIEW: Since this is so common, we should add API support for single chunk
         m_leecher->download(list<ChunkInfo>(1, chunkMetadata));
     }
     void TorrentClient::chunkDownloadSuccess(const Chunk& chunk)
@@ -217,6 +216,7 @@ namespace torrent {
         }
         // TODO: this breaks the order of the list.  Do we care?
         m_uploadList.push_back(chunk);
+// REVIEW: HERE TOO
         m_seeder->upload(list<Chunk>(1, chunk));
     }
 }
