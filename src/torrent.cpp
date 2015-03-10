@@ -5,6 +5,8 @@
 #include <cstring>
 #include <iostream>
 #include <cassert>
+#include <utility>
+#include <map>
 
 namespace torrent {
     using std::endl;
@@ -22,12 +24,11 @@ namespace torrent {
      , m_completeHash(pieces)
      {
          size_t endOffset, endChunkId;
-         endChunkId = ceil(fileLength/pieceLength) - 1;
+         endChunkId = ceil(static_cast<double>(fileLength)/pieceLength) - 1;
          endOffset = fileLength % pieceLength;
          endOffset = endOffset ? endOffset-1 : pieceLength-1;
          FilePiece newFilePiece(name, 0, endOffset,
                                 0, endChunkId, fileLength);
-         size_t size = pieces.size();
          size_t currentChunkId = 0;
          while (currentChunkId <= endChunkId)
          {
@@ -46,6 +47,7 @@ namespace torrent {
              m_chunks.push_back(newChunkInfo);
              currentChunkId++;
          }
+         std::cout << this;
      }
     
     // Multiple Files
@@ -63,9 +65,10 @@ namespace torrent {
         size_t beginOffset, endOffset;
         size_t beginChunkId, endChunkId;
         beginOffset = 0;
-        beginChunkId = 0;
+        beginChunkId = endChunkId = 0;
         for (auto& tuple : fileTuples) {
-            endChunkId = ceil((tuple.second + beginOffset)/pieceLength) + beginChunkId - 1;
+            endChunkId = ceil((tuple.second + beginOffset)/static_cast<double>(pieceLength))
+                         + beginChunkId - 1;
             endOffset = (tuple.second + beginOffset) % pieceLength;
             endOffset = endOffset ? endOffset-1 : pieceLength-1;
             FilePiece newFilePiece(tuple.first, beginOffset, endOffset,
@@ -94,7 +97,11 @@ namespace torrent {
                 m_chunks.push_back(newChunkInfo);
                 currentChunkId++;
             }
+            beginOffset = (endOffset + 1) % pieceLength;
+            beginChunkId = (beginOffset == 0)? endChunkId+1 : endChunkId;
+            
         }
+        // fileOffsetsTester(fileTuples, pieceLength, *this);
     }
     // MOVE
     Torrent::Torrent(std::unordered_set<std::string>&& announceList,
@@ -196,8 +203,46 @@ namespace torrent {
         {
             assert(0 == memcmp(chunkInfo.getChunkHash().getHash(), it, 20));
             it += 20;
+//            size_t id = chunkInfo.getChunkId();
+//            for (auto filePiece : chunkInfo.getFilePieceList())
+//            {
+//                std::pair<size_t, size_t> cr = filePiece.getFilePieceChunkRange();
+//                std::pair<size_t, size_t> offset = filePiece.getFilePieceOffsets();
+//            }
         }
         
         return s;
+    }
+    
+    bool fileOffsetsTester(const std::list<Torrent::FileTuple>& fileTuples, const size_t&                            pieceLength, const Torrent& t)
+    {
+        std::map<std::string, size_t> fileLen;
+        std::cout << t.m_chunks.size();
+        for (auto chunkInfo : t.m_chunks)
+        {
+            size_t id = chunkInfo.getChunkId();
+            for (auto filePiece : chunkInfo.getFilePieceList())
+            {
+                std::pair<size_t, size_t> cr = filePiece.getFilePieceChunkRange();
+                assert(cr.first <= id && cr.second >= id);
+                std::pair<size_t, size_t> offset = filePiece.getFilePieceOffsets();
+                size_t length = offset.second - offset.first + 1;
+                auto it = fileLen.find(filePiece.getFilePieceName());
+                if (it != fileLen.end())
+                {
+                    it->second += length;
+                }
+                else
+                    fileLen[filePiece.getFilePieceName()] = length;
+            }
+        }
+        
+        for (auto tuple : fileTuples)
+        {
+//            std::cout << 'torrent: ' << fileLen[tuple.first] == tuple.second
+//            assert(fileLen[tuple.first] == tuple.second);
+        }
+        
+        return false;
     }
 }
