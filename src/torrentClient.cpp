@@ -42,7 +42,9 @@ namespace torrent {
         m_downloadLocation += m_torrent.getName() + "/";
         // Check that this download location exists: if not, create it.
         if (!boost::filesystem::exists(m_downloadLocation)) {
-            boost::filesystem::create_directories(m_downloadLocation);
+            boost::filesystem::path path(m_downloadLocation);
+            boost::filesystem::create_directories(
+                boost::filesystem::absolute(path));
         }
         
         // Now that we have parsed the file, we can get the real name of
