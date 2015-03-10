@@ -38,18 +38,28 @@ def build(bld):
           tests.append(s)
         else:
           impls.append(s)
+
+    sourceObjects = bld.objects(
+        features='cxx',
+        target='src-objects',
+        name='src-objects',
+        source=impls,
+        use=['CRYPTOPP', 'NDN-CXX'],
+        includes='. src'
+    )
+
     for t in tests:
           sources =  copy.copy(impls)
           sources.append(t)
-          #print sources
-          bld.program(source=sources,
-                #features='test',
+          bld.program(
+                features="cxx cxxprogram",
+                source=[t],
                 includes=". src",
                 target=str(t)[:-6] \
                     if str(t)[-6:] == ".t.cpp" \
                     else str(t)[:-4],
                 stlib=libs,
-                use=['CRYPTOPP', 'NDN-CXX'])
+                use=['src-objects', 'CRYPTOPP', 'NDN-CXX'])
 
     #from waflib.Tools import waf_unit_test
     #bld.add_post_fun(waf_unit_test.summary)
