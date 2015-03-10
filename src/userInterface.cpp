@@ -1,5 +1,6 @@
-#include<torrentClient.hpp>
+#include <torrentClient.hpp>
 #include <iostream>
+#include <unistd.h>
 
 using namespace std;
 
@@ -14,5 +15,9 @@ int main(int argn, char *argv[]) {
     cin >> downloadLocation;
     cout << "Using " << downloadLocation << " as the download directory.\n";
     torrent::TorrentClient c(filename, downloadLocation);
-    return c.start();
+    c.start();
+    // For now, loop forever 
+    while(true) {
+        sleep(1000);
+    }
 }
