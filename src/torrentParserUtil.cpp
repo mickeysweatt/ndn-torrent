@@ -30,7 +30,7 @@ namespace torrent {
                               std::vector<char>& pieces);
 
     static void getInfoMultiFileTorrent(const BencodeDict&         infoDict,
-                                        list<pair<string, size_t> > files,
+                                        list<pair<string, size_t> >& files,
                                         string&                    name,
                                         size_t&                    pieceLength,
                                         vector<char>&              pieces);
@@ -76,11 +76,11 @@ namespace torrent {
         pieces      = piecesTokenPtr->getValue();
     }
     
-    static void getInfoMultiFileTorrent(const BencodeDict&        infoDict,
-                                        list<pair<string, size_t> > files,
-                                        string&                   name,
+    static void getInfoMultiFileTorrent(const BencodeDict&           infoDict,
+                                        list<pair<string, size_t> >& files,
+                                        string&                      name,
                                         size_t&                      pieceLength,
-                                        vector<char>&             pieces)
+                                        vector<char>&                pieces)
     {
         auto fileListToken  = dynamic_pointer_cast<const BencodeList >(
                                                 infoDict.find("files")->second);
@@ -105,8 +105,9 @@ namespace torrent {
                            dynamic_pointer_cast<const BencodeIntegerToken>(
                                    fileDict->find("length")->second);
             assert (nullptr != lengthToken);
-            files.push_back(std::make_pair(pathString,
-                                           lengthToken->getValue()));
+            auto p = std::make_pair(pathString,
+                                    lengthToken->getValue());
+            files.push_back(p);
         }
         getInfoCommon(infoDict, name, pieceLength, pieces);
     }
