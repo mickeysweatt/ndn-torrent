@@ -39,7 +39,7 @@ namespace torrent {
             m_downloadLocation += "/";
         }
         // Now, add a directory to put the download in.
-        m_downloadLocation += m_torrent.getName();
+        m_downloadLocation += m_torrent.getName() + "/";
         // Check that this download location exists: if not, create it.
         if (!boost::filesystem::exists(m_downloadLocation)) {
             boost::filesystem::create_directories(m_downloadLocation);
@@ -47,9 +47,10 @@ namespace torrent {
         
         // Now that we have parsed the file, we can get the real name of
         // the torrent.
-        m_seeder = new Seeder(*this, "ndn:/torrent/" + m_downloadLocation + "/");
-        m_leecher = new Leecher(ndn::Name("ndn:/torrent/" + m_downloadLocation), *this);
-        m_downloadLocation += "/";
+        cout << "Announcing/downloading from prefix\n"
+             << "ndn:/torrent/" << m_torrent.getName() << "/";
+        m_seeder = new Seeder(*this, "ndn:/torrent/" + m_torrent.getName() + "/");
+        m_leecher = new Leecher(ndn::Name("ndn:/torrent/" + m_torrent.getName()), *this);
     }
     
     TorrentClient::~TorrentClient()
