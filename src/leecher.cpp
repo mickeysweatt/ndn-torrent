@@ -23,14 +23,11 @@ namespace {
 
    class ChunkCallback {
        // DATA
-       const ChunkInfo& m_chunkInfo;
        torrent::Leecher& m_leecher;
        
       public:
-       ChunkCallback(const ChunkInfo&        chunkInfo, 
-                     torrent::Leecher& leecher)
-        : m_chunkInfo(chunkInfo)
-        , m_leecher(leecher)
+       ChunkCallback(torrent::Leecher& leecher)
+        : m_leecher(leecher)
         {
         }
 
@@ -43,8 +40,10 @@ namespace {
             c.getContextOption(PREFIX, prefix);
             Name suffix;
             c.getContextOption(SUFFIX, suffix);
+            auto it = m_leecher.getPendingChunks().find(suffix);
             // TODO, some processing with the name?
-            m_leecher.processDownloadedChunk(std::move(content), m_chunkInfo);
+            std::cout << "IN PROCESS PAYLOAD " << prefix << std::endl;
+            m_leecher.processDownloadedChunk(std::move(content), it->second, suffix);
         }
    };
 }
@@ -54,40 +53,35 @@ namespace torrent {
                      TorrentClientProtocol& clientProtocol)
    : m_prefix(prefix)
    , m_clientProtocol(clientProtocol)
+   , m_consumer(prefix, RDR)
    {
+       m_callback = new ChunkCallback(*this);
+       m_consumer.setContextOption(MUST_BE_FRESH_S, true);
+       m_consumer.setContextOption(CONTENT_RETRIEVED,
+                          static_cast<ndn::ConsumerContentCallback>(
+                            bind(&ChunkCallback::processPayload, 
+                                 m_callback,
+                                 _1, 
+                                 _2, 
+                                 _3)));
    }
 
    Leecher::~Leecher() 
    {
-      for (auto& it : m_pendingChunks) {
-        it.second->stop();
-      }
+       m_consumer.stop();
+       delete m_callback;
    }
 
    int Leecher::download(const ChunkInfo& chunkInfo, bool block)
    {
-       ChunkCallback cb(chunkInfo, *this);
+       // use API to request chunk with id in ChunkInfo
        std::ostringstream ostr;
        ostr << m_prefix << "/" << chunkInfo.getChunkId();
-       ndn::Consumer c(ostr.str(), RDR);
+       std::cout << "CONSUMING: " << ostr.str() << std::endl;
+       ndn::Name suffix = ndn::Name(ostr.str());
+       m_consumer.asyncConsume(suffix);
 
-       // ndn::Consumer c(m_prefix, RDR);
-
-       // use API to request chunk with id in ChunkInfo
-       c.setContextOption(MUST_BE_FRESH_S, false);
-       c.setContextOption(CONTENT_RETRIEVED,
-                          static_cast<ndn::ConsumerContentCallback>(
-                            bind(&ChunkCallback::processPayload, 
-                                 &cb, 
-                                 _1, 
-                                 _2, 
-                                 _3)));
-       // std::ostringstream ostr; //output string stream
-       // ostr << m_prefix << "/" << chunkInfo.getChunkId();
-       // c.asyncConsume(ndn::Name(ostr.str()));
-       c.asyncConsume(ndn::Name());
-
-       m_pendingChunks.insert(std::make_pair(&chunkInfo, &c));
+       m_pendingChunks.insert(std::make_pair(suffix, &chunkInfo));
        // Returning immediately, means we must make sure that this object
        // remains in scope.
        if (block) {
@@ -107,12 +101,12 @@ namespace torrent {
     
    int Leecher::stopDownload(const ChunkInfo& chunkInfo)
    {
-       auto it = m_pendingChunks.find(&chunkInfo);
-       if (m_pendingChunks.end() != it) {
-           it->second->stop();
-           m_pendingChunks.erase(it->first);
-           return 1;
-       }
+//       auto it = m_pendingChunks.find(&chunkInfo);
+//       if (m_pendingChunks.end() != it) {
+//           it->second->stop();
+//           m_pendingChunks.erase(it->first);
+//           return 1;
+//       }
        return 0;
    }
 
@@ -127,20 +121,27 @@ namespace torrent {
    }
 
     void Leecher::processDownloadedChunk(std::vector<char> content, 
-                                         const ChunkInfo&  chunkInfo)
+                                         const ChunkInfo*  chunkInfo,
+                                         const Name&       chunkName)
    {
        torrent::SHA1Hash sha1(reinterpret_cast<const unsigned char *>(
                                   content.data()),
                               static_cast<unsigned long>(content.size()));
 
-        // if hashes match
-        if (sha1 == chunkInfo.getChunkHash() ) {
-            Chunk chunk(chunkInfo, std::move(content));
+    
+       // if hashes match
+        if (sha1 == chunkInfo->getChunkHash() ) {
+            Chunk chunk(*chunkInfo, std::move(content));
             m_clientProtocol.chunkDownloadSuccess(chunk);
-            m_pendingChunks.erase(&chunkInfo);
+            m_pendingChunks.erase(chunkName);
         }
         else {
             assert(false && "hash did not match");
         }
    }
+    
+    Leecher::ChunkInfoMap Leecher::getPendingChunks() const
+    {
+        return m_pendingChunks;
+    }
 }
