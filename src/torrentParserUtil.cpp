@@ -140,6 +140,9 @@ namespace torrent {
             for (auto it2 : currList->getTokens()) {
                 auto announceURLToken = 
                               dynamic_pointer_cast<BencodeByteStringToken>(it2);
+                if (nullptr == announceURLToken) {
+                    break;
+                }
                 assert(nullptr != announceURLToken);
                 announcelist.insert(announceURLToken->getString());
             }
