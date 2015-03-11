@@ -42,7 +42,7 @@ namespace {
             c.getContextOption(SUFFIX, suffix);
             auto it = m_leecher.getPendingChunks().find(suffix);
             // TODO, some processing with the name?
-            std::cout << "IN PROCESS PAYLOAD " << prefix << std::endl;
+            std::cout << "IN PROCESS PAYLOAD " << prefix <<  "/" << suffix << std::endl;
             m_leecher.processDownloadedChunk(std::move(content), it->second, suffix);
         }
    };
@@ -75,9 +75,7 @@ namespace torrent {
    int Leecher::download(const ChunkInfo& chunkInfo, bool block)
    {
        // use API to request chunk with id in ChunkInfo
-       std::ostringstream ostr;
-       ostr << m_prefix << "/" << chunkInfo.getChunkId();
-       std::cout << "CONSUMING: " << ostr.str() << std::endl;
+       std::cout << "CONSUMING: " << m_prefix << "/" << chunkInfo.getChunkId() << std::endl;
 
        // ndn::Name suffix = ndn::Name(ostr.str());
        std::ostringstream suffixOstr;

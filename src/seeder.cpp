@@ -24,7 +24,7 @@ void Seeder::SeederCallback::onCacheMiss(ndn::Producer& producer, const ndn::Int
 {
    const ndn::Name name = interest.getName();
    size_t chunkIdIndex = m_seeder.m_prefix.size();
-
+   std::cout << "PRODUCING: " << interest.toUri() << std::endl;
    // Drop interest if malformed interest name
    if (chunkIdIndex >= name.size())
       return;
