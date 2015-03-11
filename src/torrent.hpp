@@ -26,24 +26,27 @@ class Torrent {
     // Destroy this object.
     
     Torrent(const Torrent& other) = default;
-
+    
+    // single file constructor
     Torrent(const std::unordered_set<std::string>& announceList,
             std::string&                           name,
             size_t                                 pieceLength,
             size_t                                 fileLength,
             const std::vector<char>&               pieces);
-    
-    Torrent(std::unordered_set<std::string>&& announceList,
-            std::string&&                     name,
-            size_t                            pieceLength,
-            std::list<FileTuple>&&            files,
-            std::vector<char>&&               pieces);
 
+    // multiple files constructor
     Torrent(const std::unordered_set<std::string>& announceList,
             std::string&                     name,
             size_t                           pieceLength,
             const std::list<FileTuple>&      fileTuples,
             const std::vector<char>&         pieces);
+    
+    // move constructor for multiple files
+    Torrent(std::unordered_set<std::string>&& announceList,
+            std::string&&                     name,
+            size_t                            pieceLength,
+            std::list<FileTuple>&&            files,
+            std::vector<char>&&               pieces);
     
     Torrent(Torrent&& other);
         // Move the value of the specified 'other' object into this
@@ -71,7 +74,11 @@ class Torrent {
     
     // HELPER
     friend std::ostream& operator<<(std::ostream& s, const Torrent& t);
-    friend bool fileOffsetsTester(const std::list<FileTuple>& fileTuples, const size_t&                            pieceLength, const Torrent& t);
+    
+    friend bool singleFileOffsetsTester(const std::string& name, const size_t fileLength,
+                                        const size_t& pieceLength, const Torrent& t);
+    
+    friend bool multipleFileOffsetsTester(const std::list<FileTuple>& fileTuples, const size_t&                            pieceLength, const Torrent& t);
   
   private:
     // DATA
