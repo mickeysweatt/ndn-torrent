@@ -59,7 +59,6 @@ namespace torrent {
              beginOffset = (endOffset + 1) % pieceLength;
          }
 
-//         std::cout << this;
          singleFileOffsetsTester(name, fileLength, pieceLength, *this);
      }
     
@@ -131,7 +130,6 @@ namespace torrent {
             beginChunkId = (beginOffset == 0)? endChunkId+1 : endChunkId;
         }
 
-        std::cout << this;
         multipleFileOffsetsTester(fileTuples, pieceLength, *this);
     }
     
@@ -203,7 +201,6 @@ namespace torrent {
             beginChunkId = (beginOffset == 0)? endChunkId+1 : endChunkId;
         }
         
-        std::cout << this;
         multipleFileOffsetsTester(fileTuples, pieceLength, *this);
     }
     
