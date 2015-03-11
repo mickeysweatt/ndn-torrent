@@ -110,7 +110,7 @@ namespace torrent {
                 }
                 
                 // Read in the appropriate amount from this file.
-                int read_amount =
+                size_t read_amount =
                     min(m_torrent.getPieceLength() - chunk_offset,
                         file.getFilePieceLen());
                 in.read(readBuffer + chunk_offset, read_amount);
@@ -128,7 +128,7 @@ namespace torrent {
             // then don't try to compute the checksums.
             
             // Otherwise, compare the checksum.
-            if (!skip_chunk && chunk.getChunkHash() == SHA1Hash(
+            if (!skip_chunk  && chunk.getChunkHash() == SHA1Hash(
                     reinterpret_cast<unsigned char*>(readBuffer), chunk_offset)) {
                 m_uploadList.push_back(
                 Chunk(chunk, vector<char>(readBuffer, readBuffer + chunk_offset)));
@@ -216,8 +216,7 @@ namespace torrent {
         }
         // TODO: this breaks the order of the list.  Do we care?
         m_uploadList.push_back(chunk);
-// REVIEW: HERE TOO
-        m_seeder->upload(list<Chunk>(1, chunk));
+        m_seeder->upload(chunk);
     }
 }
 
