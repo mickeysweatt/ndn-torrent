@@ -27,12 +27,22 @@ void Seeder::SeederCallback::onCacheMiss(ndn::Producer& producer, const ndn::Int
    std::cout << "PRODUCING: " << interest.toUri() << std::endl;
    // Drop interest if malformed interest name
    if (chunkIdIndex >= name.size())
+   {
+      ndn::ApplicationNack nack(interest,
+                                ndn::ApplicationNack::DATA_NOT_AVAILABLE);
+      producer.nack(nack);
       return;
+   }
 
    size_t id = atoi(name.get(chunkIdIndex).toUri().c_str());
    // Drop interest if we don't have a suitable producer
    if (!m_seeder.m_chunks.count(id))
+   {
+      ndn::ApplicationNack nack(interest,
+                                ndn::ApplicationNack::DATA_NOT_AVAILABLE);
+      producer.nack(nack);
       return;
+   }
 
    const std::vector<char>& buffer = m_seeder.m_chunks[id].getBuffer();
 
@@ -43,62 +53,71 @@ void Seeder::SeederCallback::onCacheMiss(ndn::Producer& producer, const ndn::Int
     
 void Seeder::SeederCallback::onCacheHit(ndn::Producer& producer, const ndn::Interest& interest)
 {
-    const ndn::Name name = interest.getName();
-    size_t chunkIdIndex = m_seeder.m_prefix.size();
-    std::cout << "PRODUCING: " << interest.toUri() << std::endl;
+   const ndn::Name name = interest.getName();
+   size_t chunkIdIndex = m_seeder.m_prefix.size();
+   std::cout << "PRODUCING: " << interest.toUri() << std::endl;
 }
 
 Seeder::Seeder(TorrentClientProtocol& clientProtocol)
    : m_prefix("/torrent/file"),
      m_clientProtocol(clientProtocol),
-     m_producer(m_prefix),
+     m_producer(new ndn::Producer(m_prefix)),
      m_callback(new SeederCallback(*this))
 {
-   m_producer.setContextOption(CACHE_MISS,
-                              static_cast<ndn::ProducerInterestCallback>(std::bind(&SeederCallback::onCacheMiss, m_callback, _1, _2)));
-   m_producer.attach();
+   m_producer->setContextOption(CACHE_MISS,
+                                static_cast<ndn::ProducerInterestCallback>(std::bind(&SeederCallback::onCacheMiss, m_callback, _1, _2)));
+   m_producer->attach();
 }
 
 Seeder::Seeder(const ndn::Name& prefix,
                       TorrentClientProtocol& clientProtocol)
    : m_prefix(prefix),
      m_clientProtocol(clientProtocol),
-     m_producer(prefix),
+     m_producer(new ndn::Producer(m_prefix)),
      m_callback(new SeederCallback(*this))
 {
-   m_producer.setContextOption(CACHE_MISS,
-                              static_cast<ndn::ProducerInterestCallback>(std::bind(&SeederCallback::onCacheMiss, m_callback, _1, _2)));
-   m_producer.attach();
+   m_producer->setContextOption(CACHE_MISS,
+                                static_cast<ndn::ProducerInterestCallback>(std::bind(&SeederCallback::onCacheMiss, m_callback, _1, _2)));
+   m_producer->attach();
 }
 
-/*
+
 Seeder::Seeder(Seeder&& other)
    : m_prefix(std::move(other.m_prefix)),
      m_clientProtocol(other.m_clientProtocol),
-     m_producer(std::move(other.m_producer)),
      m_chunks(std::move(other.m_chunks))
 {
+   m_producer = other.m_producer;
+   other.m_producer = nullptr;
+
    m_callback = other.m_callback;
    other.m_callback = nullptr;
 }
-*/
 
-/*
+
+
 Seeder& Seeder::operator=(Seeder&& other)
 {
    m_prefix = std::move(other.m_prefix);
    m_clientProtocol = other.m_clientProtocol;
    m_producer = std::move(other.m_producer);
    m_chunks = std::move(other.m_chunks);
+
+   m_producer = other.m_producer;
+   other.m_producer = nullptr;
+
    m_callback = other.m_callback;
    other.m_callback = nullptr;
 
    return *this;
 }
-*/
+
 
 Seeder::~Seeder()
 {
+   if (m_producer != nullptr)
+      delete m_producer;
+
    if (m_callback != nullptr)
       delete m_callback;
 }
@@ -108,10 +127,11 @@ Seeder::SeederError Seeder::upload(const std::list<Chunk>& chunkDataList)
    SeederError retErrorCode = NO_ERROR;
    SeederError errorCode;
    
-    for (auto iter = chunkDataList.begin(); iter != chunkDataList.end(); ++iter) {
+    for (auto iter = chunkDataList.begin(); iter != chunkDataList.end(); ++iter)
+    {
        std::cout << "UPLOADING " << iter->getMetadata().getChunkId() << std::endl;
-      if ((errorCode = upload(*iter)) != NO_ERROR) 
-         retErrorCode = errorCode;
+       if ((errorCode = upload(*iter)) != NO_ERROR) 
+          retErrorCode = errorCode;
     }
    return retErrorCode;
 }
@@ -131,6 +151,9 @@ Seeder::SeederError Seeder::upload(std::list<Chunk>&& chunkDataList)
 Seeder::SeederError Seeder::upload(const Chunk& chunk)
 {
    size_t id = chunk.getMetadata().getChunkId();
+   if (m_chunks.count(id) > 0)
+      return CHUNK_ALREADY_EXISTS;
+
    m_chunks.insert(std::make_pair(id, chunk));
    const std::vector<char>& buffer = chunk.getBuffer();
    std::ostringstream ostr;
@@ -142,6 +165,9 @@ Seeder::SeederError Seeder::upload(const Chunk& chunk)
 Seeder::SeederError Seeder::upload(Chunk&& chunk)
 {
    size_t id = chunk.getMetadata().getChunkId();
+   if (m_chunks.count(id) > 0)
+      return CHUNK_ALREADY_EXISTS;
+
    m_chunks.insert(std::make_pair(id, std::move(chunk)));
   
    return NO_ERROR;

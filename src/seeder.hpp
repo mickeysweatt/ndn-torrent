@@ -32,7 +32,7 @@ private:
       // Handles callbacks for when an interest arrives but the data is not
       // cached in the network.
        
-     void onCacheHit(ndn::Producer& producer, const ndn::Interest& interest);
+      void onCacheHit(ndn::Producer& producer, const ndn::Interest& interest);
    private:
       Seeder& m_seeder;
    };
@@ -41,7 +41,7 @@ public:
    // ERROR CODES
    enum SeederError
    {
-      NO_ERROR, CHUNK_NOT_FOUND
+      NO_ERROR, CHUNK_NOT_FOUND, CHUNK_ALREADY_EXISTS
    };
 
    // CREATORS
@@ -58,10 +58,10 @@ public:
    Seeder& operator=(const Seeder& other) = delete;
    // Seeder is non-copyable
 
-//   Seeder(Seeder&& other);
+   Seeder(Seeder&& other);
    // Move constructor to move a Seeder.
 
-//   Seeder& operator=(Seeder&& other);
+   Seeder& operator=(Seeder&& other);
    // Move assignment to move a Seeder.
 
    ~Seeder();
@@ -106,8 +106,7 @@ private:
    // DATA
    ndn::Name m_prefix;
    TorrentClientProtocol& m_clientProtocol;
-   //std::unordered_map<size_t, std::unique_ptr<ndn::Producer>> m_producers;
-   ndn::Producer m_producer;
+   ndn::Producer *m_producer;
    std::unordered_map<size_t, Chunk> m_chunks;
    SeederCallback *m_callback;
 };
