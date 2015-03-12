@@ -116,9 +116,9 @@ namespace torrent {
        
        // Returning immediately, means we must make sure that this object
        // remains in scope.
-       if (block) {
-           Consumer::consumeAll();
-       }
+//       if (block) {
+//           Consumer::consumeAll();
+//       }
        return 0;
    }
 
@@ -169,6 +169,7 @@ namespace torrent {
         }
         else {
             std::cout << "hash did not match " << chunkInfo->getChunkId() << std::endl;
+            std::cout.flush();
             assert(false);
         }
    }

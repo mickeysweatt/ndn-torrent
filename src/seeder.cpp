@@ -56,6 +56,12 @@ void Seeder::SeederCallback::onCacheHit(ndn::Producer& producer, const ndn::Inte
    std::cout << "PRODUCING: " << interest.toUri() << std::endl;
 }
 
+void Seeder::SeederCallback::onInterestEntersContext(ndn::Producer& producer, const ndn::Interest& interest)
+{
+    std::cout << "INTEREST RECIEVED: " << interest.toUri() << std::endl;
+}
+    
+
 Seeder::Seeder(TorrentClientProtocol& clientProtocol)
    : m_prefix("/torrent/file"),
      m_clientProtocol(clientProtocol),
@@ -76,6 +82,8 @@ Seeder::Seeder(const ndn::Name& prefix,
 {
    m_producer->setContextOption(CACHE_MISS,
                                 static_cast<ndn::ProducerInterestCallback>(std::bind(&SeederCallback::onCacheMiss, m_callback, _1, _2)));
+    m_producer->setContextOption(INTEREST_ENTER_CNTX ,
+                                 static_cast<ndn::ProducerInterestCallback>(std::bind(&SeederCallback::onInterestEntersContext,     m_callback, _1, _2)));
    m_producer->attach();
 }
 

@@ -33,6 +33,9 @@ private:
       // cached in the network.
        
       void onCacheHit(ndn::Producer& producer, const ndn::Interest& interest);
+       
+      void onInterestEntersContext(ndn::Producer& producer, const ndn::Interest& interest);
+   
    private:
       Seeder& m_seeder;
    };
