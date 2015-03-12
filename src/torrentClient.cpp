@@ -50,7 +50,7 @@ namespace torrent {
         // Now that we have parsed the file, we can get the real name of
         // the torrent.
         cout << "Announcing/downloading from prefix\n"
-             << "ndn:/torrent/" << m_torrent.getName() << "/";
+             << "ndn:/torrent/" << m_torrent.getName() << "/\n";
         m_seeder = new Seeder(ndn::Name("ndn:/torrent/" + m_torrent.getName()), *this);
         m_leecher = new Leecher(ndn::Name("ndn:/torrent/" + m_torrent.getName()), *this);
     }
@@ -205,12 +205,11 @@ namespace torrent {
         list<FilePiece> files = metadata.getFilePieceList();
         ofstream out;
         for (const FilePiece& file : files) {
-            pair<size_t, size_t> fileOffsets = file.getFilePieceOffsets();
             size_t write_amount = min(file.getFilePieceLen(),
                                       chunk_size - chunk_offset);
             out.open(m_downloadLocation + file.getFilePieceName());
             //TODO: handle write errors
-            out.seekp(fileOffsets.first);
+            out.seekp(file.getFilePieceOffset());
             out.write(chunk.getBuffer().data() + chunk_offset, write_amount);
             out.close();
         }
