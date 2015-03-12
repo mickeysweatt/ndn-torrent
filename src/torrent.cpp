@@ -118,7 +118,7 @@ namespace torrent {
                     length = tuple.second - accrued;
                 else
                     length = pieceLength - index;
-                
+
                 newFilePiece.setOffset(accrued, length);
                 ChunkInfo newChunkInfo(currentChunkId, hash);
                 newChunkInfo.addFilePiece(newFilePiece);
@@ -127,7 +127,7 @@ namespace torrent {
                 // Update variables
                 currentChunkId++;
                 accrued += length;
-                index = (index + accrued) % pieceLength;
+                index = (index + length) % pieceLength;
             }
             beginChunkId = (index == 0)? endChunkId+1 : endChunkId;
         }
