@@ -225,7 +225,7 @@ namespace torrent {
         for (const FilePiece& file : files) {
             size_t write_amount = min(file.getFilePieceLen(),
                                       chunk_size - chunk_offset);
-            out.open(m_downloadLocation + file.getFilePieceName());
+            out.open(m_downloadLocation + file.getFilePieceName(), ios_base::app);
             //TODO: handle write errors
             out.seekp(file.getFilePieceOffset());
             out.write(chunk.getBuffer().data() + chunk_offset, write_amount);
