@@ -83,6 +83,8 @@ namespace torrent {
         
         char* readBuffer = new char[m_torrent.getPieceLength()];
         
+        //cout << "Max piece length: " << m_torrent.getPieceLength() << "\n";
+        
         size_t file_offset = 0;
         for (const ChunkInfo& chunk : m_torrent.getChunks())
         {
@@ -92,8 +94,14 @@ namespace torrent {
             // TODO:
             // We will repeatedly try to open the same file multiple times
             // if it does not exist.
-            for (const FilePiece file : chunk.getFilePieceList())
+            for (const FilePiece& file : chunk.getFilePieceList())
             {
+                /* cout << "Chunk: " << chunk.getChunkId() << " File: "
+                     << file.getFilePieceName() << " Offsets: "
+                     << file.getFilePieceLen() << "("
+                     << file.getFilePieceOffset() << ","
+                     << (file.getFilePieceOffset() + file.getFilePieceLen())
+                     << ")\n"; */
                 // If we are now processing a different file, close current
                 // file and open the next one.
                 if (!in.is_open() || openFile != file.getFilePieceName()) {
@@ -114,6 +122,11 @@ namespace torrent {
                 size_t read_amount =
                     min(m_torrent.getPieceLength() - chunk_offset,
                         file.getFilePieceLen());
+                if (read_amount > m_torrent.getPieceLength()) {
+                    cout << "Warning: chunk " << chunk.getChunkId()
+                         << " exceeds maximum file length.\n"; 
+                    read_amount = m_torrent.getPieceLength();
+                }
                 in.read(readBuffer + chunk_offset, read_amount);
                 // If there is an error reading or incorrect number of bits
                 // skip the chunk.
@@ -124,6 +137,7 @@ namespace torrent {
                 
                 file_offset += read_amount;
                 chunk_offset += read_amount;
+                //cout << "Read " << chunk_offset << " into chunk " << chunk.getChunkId() << "\n";
             }
             // If we did not successfully read the entire chunk,
             // then don't try to compute the checksums.
@@ -187,6 +201,7 @@ namespace torrent {
         
         // Attempt to download the chunk again.
 // REVIEW: Since this is so common, we should add API support for single chunk
+        cout << "Failure to download of chunk " << chunkMetadata.getChunkId() << "\n";
         m_leecher->download(list<ChunkInfo>(1, chunkMetadata));
     }
     void TorrentClient::chunkDownloadSuccess(const Chunk& chunk)
@@ -194,6 +209,7 @@ namespace torrent {
         const ChunkInfo& metadata = chunk.getMetadata();
         //Remove this chunk from our download list.
         // TODO: is this step necessary? O(n), could be chagned to O(log(n))
+        cout << "Successful download of chunk " << chunk.getMetadata().getChunkId() << "\n";
         for (auto iter = m_downloadList.begin(); iter != m_downloadList.end(); iter++) {
             if (iter->getChunkId() == metadata.getChunkId()) {
                 m_downloadList.erase(iter);
@@ -213,6 +229,7 @@ namespace torrent {
             out.seekp(file.getFilePieceOffset());
             out.write(chunk.getBuffer().data() + chunk_offset, write_amount);
             out.close();
+            chunk_offset += write_amount;
         }
         // TODO: this breaks the order of the list.  Do we care?
         m_uploadList.push_back(chunk);
