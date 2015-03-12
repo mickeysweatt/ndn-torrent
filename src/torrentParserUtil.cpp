@@ -131,7 +131,7 @@ namespace torrent {
     {
         std::unordered_set<string> announcelist;
         std::shared_ptr<BencodeList> currList;
-        assert(nullptr != announceListToken);
+        //assert(nullptr != announceListToken);
         // unpack announce-list
         for (auto it :  announceListToken->getTokens()) {
             currList = dynamic_pointer_cast<BencodeList>(it);

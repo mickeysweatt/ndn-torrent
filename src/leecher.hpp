@@ -42,7 +42,7 @@ class Leecher {
    int stopDownload(const ChunkInfo& chunkInfo);
     // Terminates the download for chunks in chunkInfoList if possible.
     
-   ChunkInfoMap getPendingChunks() const;
+   const ChunkInfoMap& getPendingChunks() const;
 
    void processDownloadedChunk(std::vector<char> content, 
                                const ChunkInfo*  chunk,

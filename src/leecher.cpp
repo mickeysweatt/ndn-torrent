@@ -43,6 +43,7 @@ namespace {
             auto it = m_leecher.getPendingChunks().find(suffix);
             // TODO, some processing with the name?
             std::cout << "IN PROCESS PAYLOAD " << prefix <<  "/" << suffix << std::endl;
+            assert(it != m_leecher.getPendingChunks().end());
             m_leecher.processDownloadedChunk(std::move(content), it->second, suffix);
         }
         void
@@ -51,15 +52,15 @@ namespace {
             ndn::shared_ptr<ndn::Face> f;
             c.getContextOption(FACE, f);
            std::cout << "LEAVES  " << interest.toUri() << std::endl;
-            std::cout << "FACE pending interests: " << f->getNPendingInterests() << std::endl;
+//            std::cout << "FACE pending interests: " << f->getNPendingInterests() << std::endl;
         }
        void
        processExpiredInterest(Consumer& c, ndn::Interest& interest)
        {
            ndn::shared_ptr<ndn::Face> f;
            c.getContextOption(FACE, f);
-           std::cout << "EXPIRED  " << interest.toUri() << std::endl;
-           std::cout << "FACE pending interests: " << f->getNPendingInterests() << std::endl;
+//           std::cout << "EXPIRED  " << interest.toUri() << std::endl;
+//           std::cout << "FACE pending interests: " << f->getNPendingInterests() << std::endl;
        }
    };
 }
@@ -124,21 +125,9 @@ namespace torrent {
    int Leecher::download(const std::list<ChunkInfo>& chunkInfoList)
    {
         for (auto& chunkInfo : chunkInfoList) {
-            std::cout << "CONSUMING: " << m_prefix << "/" << chunkInfo.getChunkId() << std::endl;
-            
-            // ndn::Name suffix = ndn::Name(ostr.str());
-            std::ostringstream suffixOstr;
-            suffixOstr << chunkInfo.getChunkId();
-            ndn::Name suffix = ndn::Name(suffixOstr.str());
-            m_pendingChunks.insert(std::make_pair(suffix, &chunkInfo));
- //            m_consumer.asyncConsume(suffix);
-            m_consumer.consume(suffix);
-//            std::shared_ptr<ndn::Face> f;
-//            m_consumer.getContextOption(FACE, f);
-//            std::cout << "FACE pending interests: " << f->getIoService() << std::endl;
-            
+            download(chunkInfo, false);
         }
-        //Consumer::consumeAll();
+        Consumer::consumeAll();
         return 0;
    }
     
@@ -183,7 +172,7 @@ namespace torrent {
         }
    }
     
-    Leecher::ChunkInfoMap Leecher::getPendingChunks() const
+    const Leecher::ChunkInfoMap& Leecher::getPendingChunks() const
     {
         return m_pendingChunks;
     }
