@@ -143,13 +143,13 @@ namespace torrent {
             // then don't try to compute the checksums.
             
             // Otherwise, compare the checksum.
-            if (!skip_chunk  /*&& chunk.getChunkHash() == SHA1Hash(
-                    reinterpret_cast<unsigned char*>(readBuffer), chunk_offset)*/) {
+            if (!skip_chunk  && chunk.getChunkHash() == SHA1Hash(
+                    reinterpret_cast<unsigned char*>(readBuffer), chunk_offset)) {
                 m_uploadList.push_back(
                 Chunk(chunk, vector<char>(readBuffer, readBuffer + chunk_offset)));
             }
             else {
-                m_downloadList.push_back(chunk);
+                m_downloadList.push_back(std::move(chunk));
             }
         }
         
@@ -200,9 +200,10 @@ namespace torrent {
         //TODO: intellegent behavior based on the error.
         
         // Attempt to download the chunk again.
-// REVIEW: Since this is so common, we should add API support for single chunk
         cout << "Failure to download of chunk " << chunkMetadata.getChunkId() << "\n";
-        m_leecher->download(list<ChunkInfo>(1, chunkMetadata));
+
+        m_leecher->download(chunkMetadata);
+
     }
     void TorrentClient::chunkDownloadSuccess(const Chunk& chunk)
     {

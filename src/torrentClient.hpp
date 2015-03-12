@@ -56,7 +56,7 @@ class TorrentClient : public TorrentClientProtocol {
     std::string m_downloadLocation;
     Torrent m_torrent;
     std::list<Chunk> m_uploadList;
-    std::list<ChunkInfo> m_downloadList;
+    std::vector<ChunkInfo> m_downloadList;
     Seeder* m_seeder;
     Leecher* m_leecher;
     bool m_uploading;

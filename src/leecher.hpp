@@ -32,11 +32,11 @@ class Leecher {
    // Begins the download for the chunk described by ChunkInfo, if not 
    // already in the process of downloading.
 
-   int download(const std::list<ChunkInfo>& chunkInfoList);
+   int download(const std::vector<ChunkInfo>& chunkInfoList);
    // Begins the download for chunks in chunkInfoList, if not already in the
    // process of downloading.
 
-   int stopDownload(const std::list<ChunkInfo>& chunkInfoList);
+   int stopDownload(const std::vector<ChunkInfo>& chunkInfoList);
    // Terminates the download for chunks in chunkInfoList if possible.
     
    int stopDownload(const ChunkInfo& chunkInfo);

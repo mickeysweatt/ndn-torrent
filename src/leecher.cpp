@@ -59,8 +59,8 @@ namespace {
        {
            ndn::shared_ptr<ndn::Face> f;
            c.getContextOption(FACE, f);
-//           std::cout << "EXPIRED  " << interest.toUri() << std::endl;
-//           std::cout << "FACE pending interests: " << f->getNPendingInterests() << std::endl;
+           std::cout << "EXPIRED  " << interest.toUri() << std::endl;
+           std::cout << "FACE pending interests: " << f->getNPendingInterests() << std::endl;
        }
    };
 }
@@ -111,9 +111,9 @@ namespace torrent {
        std::ostringstream suffixOstr;
        suffixOstr << chunkInfo.getChunkId();
        ndn::Name suffix = ndn::Name(suffixOstr.str());
-       m_consumer.asyncConsume(suffix);
-
        m_pendingChunks.insert(std::make_pair(suffix, &chunkInfo));
+       m_consumer.consume(suffix);
+       
        // Returning immediately, means we must make sure that this object
        // remains in scope.
        if (block) {
@@ -122,12 +122,12 @@ namespace torrent {
        return 0;
    }
 
-   int Leecher::download(const std::list<ChunkInfo>& chunkInfoList)
+   int Leecher::download(const std::vector<ChunkInfo>& chunkInfoList)
    {
-        for (auto& chunkInfo : chunkInfoList) {
-            download(chunkInfo, false);
+       for (auto it = chunkInfoList.begin(); it != chunkInfoList.end(); ++it) {
+            download(*it, false );
         }
-        Consumer::consumeAll();
+        //Consumer::consumeAll();
         return 0;
    }
     
@@ -143,7 +143,7 @@ namespace torrent {
    }
 
 
-   int Leecher::stopDownload(const std::list<ChunkInfo>& chunkInfoList)
+   int Leecher::stopDownload(const std::vector<ChunkInfo>& chunkInfoList)
    {
        int rval = 0;
        for (auto chunk : chunkInfoList ) {
@@ -168,7 +168,7 @@ namespace torrent {
             m_pendingChunks.erase(chunkName);
         }
         else {
-            //assert(false && "hash did not match");
+            assert(false && "hash did not match");
         }
    }
     
