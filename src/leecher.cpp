@@ -124,7 +124,9 @@ namespace torrent {
 
    int Leecher::download(const std::vector<ChunkInfo>& chunkInfoList)
    {
-       for (auto it = chunkInfoList.begin(); it != chunkInfoList.end(); ++it) {
+     std::vector<ChunkInfo> chunkInfoListCopy = chunkInfoList;
+
+       for (auto it = chunkInfoListCopy.begin(); it != chunkInfoListCopy.end(); ++it) {
             download(*it, false );
         }
         //Consumer::consumeAll();
