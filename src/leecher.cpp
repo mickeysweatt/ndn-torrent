@@ -42,7 +42,7 @@ namespace {
             c.getContextOption(SUFFIX, suffix);
             auto it = m_leecher.getPendingChunks().find(suffix);
             // TODO, some processing with the name?
-            std::cout << "IN PROCESS PAYLOAD " << prefix <<  "/" << suffix << std::endl;
+//            std::cout << "IN PROCESS PAYLOAD " << prefix <<  "/" << suffix << std::endl;
             assert(it != m_leecher.getPendingChunks().end());
             m_leecher.processDownloadedChunk(std::move(content), it->second, suffix);
         }
@@ -51,7 +51,7 @@ namespace {
         {
             ndn::shared_ptr<ndn::Face> f;
             c.getContextOption(FACE, f);
-           std::cout << "LEAVES  " << interest.toUri() << std::endl;
+//           std::cout << "LEAVES  " << interest.toUri() << std::endl;
 //            std::cout << "FACE pending interests: " << f->getNPendingInterests() << std::endl;
         }
        void
@@ -59,8 +59,8 @@ namespace {
        {
            ndn::shared_ptr<ndn::Face> f;
            c.getContextOption(FACE, f);
-           std::cout << "EXPIRED  " << interest.toUri() << std::endl;
-           std::cout << "FACE pending interests: " << f->getNPendingInterests() << std::endl;
+           //std::cout << "EXPIRED  " << interest.toUri() << std::endl;
+           //std::cout << "FACE pending interests: " << f->getNPendingInterests() << std::endl;
        }
    };
 }
@@ -105,7 +105,7 @@ namespace torrent {
    int Leecher::download(const ChunkInfo& chunkInfo, bool block)
    {
        // use API to request chunk with id in ChunkInfo
-       std::cout << "CONSUMING: " << m_prefix << "/" << chunkInfo.getChunkId() << std::endl;
+ //      std::cout << "CONSUMING: " << m_prefix << "/" << chunkInfo.getChunkId() << std::endl;
 
        // ndn::Name suffix = ndn::Name(ostr.str());
        std::ostringstream suffixOstr;
@@ -124,10 +124,8 @@ namespace torrent {
 
    int Leecher::download(const std::vector<ChunkInfo>& chunkInfoList)
    {
-     std::vector<ChunkInfo> chunkInfoListCopy = chunkInfoList;
-
-       for (auto it = chunkInfoListCopy.begin(); it != chunkInfoListCopy.end(); ++it) {
-            download(*it, false );
+       while (!chunkInfoList.empty()) {
+           download(chunkInfoList.front(), false );
         }
         //Consumer::consumeAll();
         return 0;
