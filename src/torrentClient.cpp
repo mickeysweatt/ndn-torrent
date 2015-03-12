@@ -50,10 +50,10 @@ namespace torrent {
         // Now that we have parsed the file, we can get the real name of
         // the torrent.
         cout << "Announcing/downloading from prefix\n"
-             << "ndn:/torrent/" << m_torrent.getName() << "/" << endl;
+             << "/ndn/edu/ucla/" << m_torrent.getName() << "/" << endl;
 
-        m_seeder = new Seeder(ndn::Name("ndn:/torrent/" + m_torrent.getName()), *this);
-        m_leecher = new Leecher(ndn::Name("ndn:/torrent/" + m_torrent.getName()), *this);
+        m_seeder = new Seeder(ndn::Name("/ndn/edu/ucla/" + m_torrent.getName()), *this);
+        m_leecher = new Leecher(ndn::Name("/ndn/edu/ucla/" + m_torrent.getName()), *this);
     }
     
     TorrentClient::~TorrentClient()
