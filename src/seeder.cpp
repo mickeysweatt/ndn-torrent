@@ -40,6 +40,13 @@ void Seeder::SeederCallback::onCacheMiss(ndn::Producer& producer, const ndn::Int
                     reinterpret_cast<const uint8_t*>(buffer.data()),
                     buffer.size());
 }
+    
+void Seeder::SeederCallback::onCacheHit(ndn::Producer& producer, const ndn::Interest& interest)
+{
+    const ndn::Name name = interest.getName();
+    size_t chunkIdIndex = m_seeder.m_prefix.size();
+    std::cout << "PRODUCING: " << interest.toUri() << std::endl;
+}
 
 Seeder::Seeder(TorrentClientProtocol& clientProtocol)
    : m_prefix("/torrent/file"),
@@ -100,11 +107,12 @@ Seeder::SeederError Seeder::upload(const std::list<Chunk>& chunkDataList)
 {
    SeederError retErrorCode = NO_ERROR;
    SeederError errorCode;
-
-   for (auto iter = chunkDataList.begin(); iter != chunkDataList.end(); ++iter)
-      if ((errorCode = upload(*iter)) != NO_ERROR)
+   
+    for (auto iter = chunkDataList.begin(); iter != chunkDataList.end(); ++iter) {
+       std::cout << "UPLOADING " << iter->getMetadata().getChunkId() << std::endl;
+      if ((errorCode = upload(*iter)) != NO_ERROR) 
          retErrorCode = errorCode;
-
+    }
    return retErrorCode;
 }
 
@@ -124,7 +132,10 @@ Seeder::SeederError Seeder::upload(const Chunk& chunk)
 {
    size_t id = chunk.getMetadata().getChunkId();
    m_chunks.insert(std::make_pair(id, chunk));
-
+   const std::vector<char>& buffer = chunk.getBuffer();
+   std::ostringstream ostr;
+   ostr << chunk.getMetadata().getChunkId();
+    
    return NO_ERROR;
 }
 
@@ -132,7 +143,7 @@ Seeder::SeederError Seeder::upload(Chunk&& chunk)
 {
    size_t id = chunk.getMetadata().getChunkId();
    m_chunks.insert(std::make_pair(id, std::move(chunk)));
-
+  
    return NO_ERROR;
 }
 

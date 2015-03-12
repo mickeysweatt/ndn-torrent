@@ -31,6 +31,8 @@ private:
       void onCacheMiss(ndn::Producer& producer, const ndn::Interest& interest);
       // Handles callbacks for when an interest arrives but the data is not
       // cached in the network.
+       
+     void onCacheHit(ndn::Producer& producer, const ndn::Interest& interest);
    private:
       Seeder& m_seeder;
    };

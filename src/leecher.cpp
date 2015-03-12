@@ -45,6 +45,22 @@ namespace {
             std::cout << "IN PROCESS PAYLOAD " << prefix <<  "/" << suffix << std::endl;
             m_leecher.processDownloadedChunk(std::move(content), it->second, suffix);
         }
+        void
+        processLeavingInterest(Consumer& c, ndn::Interest& interest)
+        {
+            ndn::shared_ptr<ndn::Face> f;
+            c.getContextOption(FACE, f);
+           std::cout << "LEAVES  " << interest.toUri() << std::endl;
+            std::cout << "FACE pending interests: " << f->getNPendingInterests() << std::endl;
+        }
+       void
+       processExpiredInterest(Consumer& c, ndn::Interest& interest)
+       {
+           ndn::shared_ptr<ndn::Face> f;
+           c.getContextOption(FACE, f);
+           std::cout << "EXPIRED  " << interest.toUri() << std::endl;
+           std::cout << "FACE pending interests: " << f->getNPendingInterests() << std::endl;
+       }
    };
 }
 
@@ -57,6 +73,7 @@ namespace torrent {
    {
        m_callback = new ChunkCallback(*this);
        m_consumer.setContextOption(MUST_BE_FRESH_S, true);
+       m_consumer.setContextOption(INTEREST_LIFETIME, 1000);
        m_consumer.setContextOption(CONTENT_RETRIEVED,
                           static_cast<ndn::ConsumerContentCallback>(
                             bind(&ChunkCallback::processPayload, 
@@ -64,6 +81,18 @@ namespace torrent {
                                  _1, 
                                  _2, 
                                  _3)));
+       m_consumer.setContextOption(INTEREST_LEAVE_CNTX,
+                           static_cast<ndn::ConsumerInterestCallback>(
+                            bind(&ChunkCallback::processLeavingInterest,
+                                 m_callback,
+                                 _1,
+                                 _2)));
+       m_consumer.setContextOption(INTEREST_EXPIRED,
+                                   static_cast<ndn::ConsumerInterestCallback>(
+                                      bind(&ChunkCallback::processExpiredInterest,
+                                           m_callback,
+                                           _1,
+                                           _2)));
    }
 
    Leecher::~Leecher() 
@@ -87,17 +116,29 @@ namespace torrent {
        // Returning immediately, means we must make sure that this object
        // remains in scope.
        if (block) {
-           Consumer::consumeAll(); 
+           Consumer::consumeAll();
        }
        return 0;
    }
 
    int Leecher::download(const std::list<ChunkInfo>& chunkInfoList)
    {
-        for (auto& it : chunkInfoList) {
-            download(it, false);
+        for (auto& chunkInfo : chunkInfoList) {
+            std::cout << "CONSUMING: " << m_prefix << "/" << chunkInfo.getChunkId() << std::endl;
+            
+            // ndn::Name suffix = ndn::Name(ostr.str());
+            std::ostringstream suffixOstr;
+            suffixOstr << chunkInfo.getChunkId();
+            ndn::Name suffix = ndn::Name(suffixOstr.str());
+            m_pendingChunks.insert(std::make_pair(suffix, &chunkInfo));
+ //            m_consumer.asyncConsume(suffix);
+            m_consumer.consume(suffix);
+//            std::shared_ptr<ndn::Face> f;
+//            m_consumer.getContextOption(FACE, f);
+//            std::cout << "FACE pending interests: " << f->getIoService() << std::endl;
+            
         }
-        Consumer::consumeAll(); 
+        //Consumer::consumeAll();
         return 0;
    }
     
@@ -138,7 +179,7 @@ namespace torrent {
             m_pendingChunks.erase(chunkName);
         }
         else {
-            assert(false && "hash did not match");
+            //assert(false && "hash did not match");
         }
    }
     
