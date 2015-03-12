@@ -1,4 +1,4 @@
-#include <chunk.hpp>
+ #include <chunk.hpp>
 #include <chunkInfo.hpp>
 #include <leecher.hpp>
 #include <ndn-cxx/contexts/consumer-context.hpp>
@@ -168,7 +168,8 @@ namespace torrent {
             m_pendingChunks.erase(chunkName);
         }
         else {
-            assert(false && "hash did not match");
+            std::cout << "hash did not match " << chunkInfo->getChunkId() << std::endl;
+            assert(false);
         }
    }
     

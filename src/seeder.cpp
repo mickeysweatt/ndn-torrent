@@ -53,8 +53,6 @@ void Seeder::SeederCallback::onCacheMiss(ndn::Producer& producer, const ndn::Int
     
 void Seeder::SeederCallback::onCacheHit(ndn::Producer& producer, const ndn::Interest& interest)
 {
-   const ndn::Name name = interest.getName();
-   size_t chunkIdIndex = m_seeder.m_prefix.size();
    std::cout << "PRODUCING: " << interest.toUri() << std::endl;
 }
 
@@ -155,7 +153,6 @@ Seeder::SeederError Seeder::upload(const Chunk& chunk)
       return CHUNK_ALREADY_EXISTS;
 
    m_chunks.insert(std::make_pair(id, chunk));
-   const std::vector<char>& buffer = chunk.getBuffer();
    std::ostringstream ostr;
    ostr << chunk.getMetadata().getChunkId();
     

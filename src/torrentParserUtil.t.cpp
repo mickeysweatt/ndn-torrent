@@ -7,7 +7,7 @@
 #include <vector>
 #include <iostream>
 
-#define PREFIX "/Users/hannahjin/ndnSIM/ndn-torrent/test/"
+#define PREFIX "/Users/admin/Dropbox/ndn-torrent/test/"
 
  int main() {
      std::ifstream single(PREFIX "ubuntu-14.10-desktop-amd64.torrent",

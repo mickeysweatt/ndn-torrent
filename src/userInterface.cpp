@@ -7,7 +7,6 @@ using namespace std;
 int main(int argn, char *argv[]) {
     //TODO: process command line arguments.
     string filename, downloadLocation;
-    /*
     if (argn == 1) {
         cout << "Enter torrent file name: ";
         cin >> filename;
@@ -16,7 +15,7 @@ int main(int argn, char *argv[]) {
         string downloadLocation;
         cin >> downloadLocation;
         cout << "Using " << downloadLocation << " as the download directory.\n";
-    } else*/ if (argn == 3) {
+    } else if (argn == 3) {
         filename = string(argv[1]);
         downloadLocation = string(argv[2]);
         cout << "Will use torrent file " << filename << endl;
