@@ -24,13 +24,13 @@ void Seeder::SeederCallback::onCacheMiss(ndn::Producer& producer, const ndn::Int
 {
    const ndn::Name name = interest.getName();
    size_t chunkIdIndex = m_seeder.m_prefix.size();
-   std::cout << "PRODUCING: " << interest.toUri() << std::endl;
+   
    // Drop interest if malformed interest name
    if (chunkIdIndex >= name.size())
    {
       ndn::ApplicationNack nack(interest,
                                 ndn::ApplicationNack::DATA_NOT_AVAILABLE);
-      producer.nack(nack);
+       producer.nack(nack);
       return;
    }
 
@@ -38,14 +38,14 @@ void Seeder::SeederCallback::onCacheMiss(ndn::Producer& producer, const ndn::Int
    // Drop interest if we don't have a suitable producer
    if (!m_seeder.m_chunks.count(id))
    {
-      ndn::ApplicationNack nack(interest,
-                                ndn::ApplicationNack::DATA_NOT_AVAILABLE);
+       ndn::ApplicationNack nack(interest,
+                                 ndn::ApplicationNack::DATA_NOT_AVAILABLE);
       producer.nack(nack);
       return;
    }
 
    const std::vector<char>& buffer = m_seeder.m_chunks[id].getBuffer();
-
+   std::cout << "PRODUCING: " << interest.toUri() << std::endl;
    producer.produce(name.getSubName(chunkIdIndex, 1),
                     reinterpret_cast<const uint8_t*>(buffer.data()),
                     buffer.size());

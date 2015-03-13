@@ -75,6 +75,8 @@ namespace torrent {
        m_callback = new ChunkCallback(*this);
        m_consumer.setContextOption(MUST_BE_FRESH_S, true);
        m_consumer.setContextOption(INTEREST_LIFETIME, 1000);
+       m_consumer.setContextOption(INTEREST_RETX, 4);
+       m_consumer.setContextOption(FORWARDING_STRATEGY, BROADCAST);
        m_consumer.setContextOption(CONTENT_RETRIEVED,
                           static_cast<ndn::ConsumerContentCallback>(
                             bind(&ChunkCallback::processPayload, 
