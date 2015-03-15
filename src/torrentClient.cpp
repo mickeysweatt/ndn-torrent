@@ -50,10 +50,10 @@ namespace torrent {
         // Now that we have parsed the file, we can get the real name of
         // the torrent.
         cout << "Announcing/downloading from prefix\n"
-             << "/ndn/edu/ucla/" << m_torrent.getName() << "/" << endl;
+             << "/ndn/edu/ucla/torrent/" << m_torrent.getName() << "/" << endl;
 
-        m_seeder = new Seeder(ndn::Name("/ndn/edu/ucla/" + m_torrent.getName()), *this);
-        m_leecher = new Leecher(ndn::Name("/ndn/edu/ucla/" + m_torrent.getName()), *this);
+        m_seeder = new Seeder(ndn::Name("/ndn/edu/ucla/torrent/" + m_torrent.getName()), *this);
+        m_leecher = new Leecher(ndn::Name("/ndn/edu/ucla/torrent/" + m_torrent.getName()), *this);
     }
     
     TorrentClient::~TorrentClient()
@@ -85,7 +85,6 @@ namespace torrent {
         
         //cout << "Max piece length: " << m_torrent.getPieceLength() << "\n";
         
-        size_t file_offset = 0;
         for (const ChunkInfo& chunk : m_torrent.getChunks())
         {
             bool skip_chunk = false;
@@ -108,7 +107,6 @@ namespace torrent {
                     if (in.is_open()) {
                         in.close();
                     }
-                    file_offset = 0;
                     in.open(m_downloadLocation + file.getFilePieceName());
                     if(!in) { // If file does not exist
                         // Skip this entire chunk.
@@ -135,7 +133,6 @@ namespace torrent {
                     break;
                 }
                 
-                file_offset += read_amount;
                 chunk_offset += read_amount;
                 //cout << "Read " << chunk_offset << " into chunk " << chunk.getChunkId() << "\n";
             }
