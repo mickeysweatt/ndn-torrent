@@ -1,6 +1,7 @@
 #include <torrentClient.hpp>
 #include <iostream>
 #include <unistd.h>
+#include <functional>
 
 using namespace std;
 
@@ -26,7 +27,12 @@ int main(int argn, char *argv[]) {
         //cout << "Usage:\n" << argv[0] << " [torrentFile {downloadPath|uploadPath}]\n";
         //return 0;
     }
-    torrent::TorrentClient c(filename, downloadLocation);
+    
+    std::function<void(const torrent::Torrent&)> callback
+        = [](const torrent::Torrent& torrent) -> void {
+            cout << torrent.getName() << " has finished downloading." << endl;
+    };
+    torrent::TorrentClient c(filename, downloadLocation, callback);
     c.start();
     // For now, loop forever 
     while(true) {

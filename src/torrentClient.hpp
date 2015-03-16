@@ -7,6 +7,7 @@
 #include <torrentClientProto.hpp>
 #include <string>
 #include <list>
+#include <functional>
 
 namespace torrent {
 
@@ -17,7 +18,8 @@ class TorrentClient : public TorrentClientProtocol {
   public:
     //CREATORS
     TorrentClient(const std::string& torrentFile,
-            const std::string& downloadLocation);
+            const std::string& downloadLocation,
+            std::function<void(const Torrent&)>& onFinishDownload);
     ~TorrentClient();
     
     //METHODS
@@ -60,6 +62,7 @@ class TorrentClient : public TorrentClientProtocol {
     Seeder* m_seeder;
     Leecher* m_leecher;
     bool m_uploading;
+    std::function<void(const Torrent&)>& m_onFinishDownload;
 };
 
 }

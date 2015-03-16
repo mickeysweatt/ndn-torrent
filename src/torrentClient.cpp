@@ -16,11 +16,13 @@ namespace torrent {
 // REVIEW: Re-order to match order of declaration
     //Parse the torrent file, but don't do anything else.
     TorrentClient::TorrentClient(const string& torrentFile,
-                                 const string& downloadLocation)
+                                 const string& downloadLocation,
+                                 std::function<void(const Torrent&)>& onFinishDownload)
     : m_downloadLocation(downloadLocation),
     m_seeder(nullptr),
     m_leecher(nullptr),
-    m_uploading(false)
+    m_uploading(false),
+    m_onFinishDownload(onFinishDownload)
     {
         ifstream in(torrentFile);
         if (!in) {
@@ -169,6 +171,11 @@ namespace torrent {
                 return errVal;
                 // TODO: more reasonable behavior depending on return type.
         }
+        else
+        {
+            // If everything already downloaded, notify the UI.
+            m_onFinishDownload(m_torrent);
+        }
         
         return 0;
     }
@@ -232,6 +239,12 @@ namespace torrent {
         // TODO: this breaks the order of the list.  Do we care?
         m_uploadList.push_back(chunk);
         m_seeder->upload(chunk);
+        
+        if (m_downloadList.empty())
+        {
+            // The download has completed: let the UI know.
+            m_onFinishDownload(m_torrent);
+        }
     }
 }
 
