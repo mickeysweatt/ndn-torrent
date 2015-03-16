@@ -60,7 +60,7 @@ int main(int argn, char *argv[]) {
                 for (const torrent::FilePiece& file : chunk.getFilePieceList())
                 {
                     if (fileName == file.getFilePieceName()
-                      || boost::filesystem::exists(hardLinkLocation + fileName))
+                      || boost::filesystem::exists(hardLinkLocation + file.getFilePieceName()))
                     {
                         continue;
                     }
