@@ -59,12 +59,13 @@ int main(int argn, char *argv[]) {
             for (const torrent::ChunkInfo& chunk : torrent.getChunks()) {
                 for (const torrent::FilePiece& file : chunk.getFilePieceList())
                 {
-                    fileName = file.getFilePieceName();
-                    if (fileName == fileName
+                    if (fileName == file.getFilePieceName()
                       || boost::filesystem::exists(hardLinkLocation + fileName))
                     {
                         continue;
                     }
+                    fileName = file.getFilePieceName();
+                    
                     cout << "Creating hard link from " << 
                         (actualLocation + fileName)
                         << " to "
