@@ -1,5 +1,6 @@
 # ndn-torrent
 An implementation of a torrent-like peer-to-peer sharing system running over NDN.
+* [Technical Report](https://docs.google.com/document/d/1LR721ozXu2ARru2ZRlRdIl-xRNaYWoRVKNMYJUH9Yfs/edit?usp=sharing)
 
 ### Building ndn-torrent
 
